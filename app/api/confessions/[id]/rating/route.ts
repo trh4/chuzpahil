@@ -21,42 +21,46 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const existingClientId = request.cookies.get("chutzpah_client_id")?.value;
     const clientId = existingClientId || crypto.randomUUID();
 
-    await sql`
-      INSERT INTO ratings (confession_id, score, client_id)
-      VALUES (${id}, ${score}, ${clientId})
-      ON CONFLICT (confession_id, client_id)
-      DO UPDATE SET
-        score = EXCLUDED.score,
-        updated_at = now()
-    `;
-
-    const rows = await sql`
-      WITH aggregate AS (
-        SELECT
-          count(*)::int AS ratings_count,
-          coalesce(sum(score), 0)::int AS ratings_sum
-        FROM ratings
-        WHERE confession_id = ${id}
-      )
-      UPDATE confessions
-      SET
-        ratings_count = aggregate.ratings_count,
-        ratings_sum = aggregate.ratings_sum
-      FROM aggregate
-      WHERE confessions.id = ${id}
-        AND confessions.status = 'published'
-      RETURNING
-        id,
-        title,
-        content,
-        country,
-        topic,
-        tags,
-        image_url,
-        created_at,
-        ratings_count,
-        CASE WHEN ratings_count = 0 THEN 0 ELSE ratings_sum::numeric / ratings_count END AS average_chutzpah_score
-    `;
+    const [, rows] = await sql.transaction([
+      sql`
+        INSERT INTO ratings (confession_id, score, client_id)
+        VALUES (${id}, ${score}, ${clientId})
+        ON CONFLICT (confession_id, client_id)
+        DO UPDATE SET
+          score = EXCLUDED.score,
+          updated_at = now()
+      `,
+      sql`
+        WITH aggregate AS (
+          SELECT
+            count(*)::int AS ratings_count,
+            coalesce(sum(score), 0)::int AS ratings_sum
+          FROM ratings
+          WHERE confession_id = ${id}
+        )
+        UPDATE confessions
+        SET
+          ratings_count = aggregate.ratings_count,
+          ratings_sum = aggregate.ratings_sum
+        FROM aggregate
+        WHERE confessions.id = ${id}
+          AND confessions.status = 'published'
+        RETURNING
+          id,
+          title,
+          content,
+          country,
+          topic,
+          tags,
+          image_url,
+          created_at,
+          confessions.ratings_count AS ratings_count,
+          CASE
+            WHEN confessions.ratings_count = 0 THEN 0
+            ELSE confessions.ratings_sum::numeric / confessions.ratings_count
+          END AS average_chutzpah_score
+      `,
+    ]);
 
     if (!rows[0]) {
       return jsonError("Confession not found", 404);
