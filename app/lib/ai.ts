@@ -289,10 +289,9 @@ async function generateImageWithReferences(
   safest = false,
 ) {
   const image = await client.images.edit({
-    model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1",
+    model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-2",
     image: referenceImages,
     prompt: imagePrompt(confession, variant, safest),
-    input_fidelity: "high",
     n: 1,
     size: "1024x1024",
     quality: "low",
