@@ -19,8 +19,7 @@ export async function POST(request: Request) {
     }
 
     const generated = await generateConfessionFromPrompt(prompt);
-    const draftKey = crypto.randomUUID();
-    const imageOptions = await generateImageOptions(generated, draftKey);
+    const imageOptions = await generateImageOptions(generated);
     const rows = await sql`
       INSERT INTO confession_drafts (
         prompt,

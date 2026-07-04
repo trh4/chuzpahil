@@ -1,5 +1,5 @@
-import { put } from "@vercel/blob";
 import OpenAI from "openai";
+import { saveImage } from "./images";
 
 type GeneratedConfession = {
   title: string;
@@ -199,18 +199,11 @@ function imagePrompt(confession: GeneratedConfession, variant: number) {
   ].join("\n");
 }
 
-async function uploadImage(b64Json: string, draftKey: string, variant: number) {
-  const imageBuffer = Buffer.from(b64Json, "base64");
-  const blob = await put(`confession-drafts/${draftKey}/option-${variant}.png`, imageBuffer, {
-    access: "public",
-    contentType: "image/png",
-    addRandomSuffix: true,
-  });
-
-  return blob.url;
+async function uploadImage(b64Json: string) {
+  return saveImage(Buffer.from(b64Json, "base64"), "image/png");
 }
 
-export async function generateImageOptions(confession: GeneratedConfession, draftKey: string) {
+export async function generateImageOptions(confession: GeneratedConfession) {
   const client = getOpenAI();
 
   return Promise.all(
@@ -231,7 +224,7 @@ export async function generateImageOptions(confession: GeneratedConfession, draf
         throw new Error("OpenAI did not return generated image data");
       }
 
-      return uploadImage(b64Json, draftKey, variant);
+      return uploadImage(b64Json);
     }),
   );
 }
