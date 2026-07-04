@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="discover_tune">
+<mask id="mask0_0_52" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
+<rect id="Bounding box" width="14" height="14" fill="var(--fill-0, #2B2B2B)"/>
+</mask>
+<g mask="url(#mask0_0_52)">
+<path id="discover_tune_2" d="M7.58333 5.25V4.08333H9.33333V1.75H10.5V4.08333H12.25V5.25H7.58333ZM9.33333 12.25V6.41667H10.5V12.25H9.33333ZM3.5 12.25V9.91667H1.75V8.75H6.41667V9.91667H4.66667V12.25H3.5ZM3.5 7.58333V1.75H4.66667V7.58333H3.5Z" fill="var(--fill-0, #2B2B2B)"/>
+</g>
+</g>
+</svg>

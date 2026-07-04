@@ -1,15 +1,19 @@
 {
-  "name": "nextjs",
+  "name": "my-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.4",
+    "@neondatabase/serverless": "^1.1.0",
+    "@vercel/blob": "^2.5.0",
+    "next": "16.2.10",
+    "openai": "^6.45.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -19,8 +23,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
 }
