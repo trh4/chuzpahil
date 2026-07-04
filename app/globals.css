@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffaf0;
+  --foreground: #2b2b2b;
 }
 
 @theme inline {
@@ -19,17 +19,20 @@
   font-family: var(--font-haim), var(--font-ploni), ui-sans-serif, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-ploni), ui-sans-serif, system-ui, sans-serif;
+}
+
+.splash-intro {
+  animation: splashIntro 2200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.splash-intro-panel {
+  animation: splashIntroPanel 2200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  box-shadow: 0 0 0 1px rgba(255, 250, 240, 0.9);
 }
 
 @keyframes passportIn {
@@ -39,5 +42,42 @@ body {
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes splashIntro {
+  0%,
+  72% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes splashIntroPanel {
+  0% {
+    transform: scale(0.985);
+  }
+
+  42%,
+  72% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.015);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-intro,
+  .splash-intro-panel {
+    animation-duration: 180ms;
+  }
+
+  .splash-intro-panel {
+    transform: none;
   }
 }

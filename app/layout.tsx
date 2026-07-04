@@ -18,7 +18,7 @@ export default function RootLayout({
       dir="rtl"
       className={`${ploni.variable} ${ploniYad.variable} ${haimG.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#fffaf0] font-sans">{children}</body>
     </html>
   );
 }

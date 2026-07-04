@@ -46,3 +46,22 @@ export const sortLabels: Record<SortValue, string> = {
   "most-chutzpah": "הכי חצוף",
   "most-polite": "הכי מנומס",
 };
+
+/** Figma node 768:8575 — אפשרויות מיון */
+export const sortOrder: SortValue[] = ["most-chutzpah", "most-polite", "newest", "oldest", "random"];
+
+/** Figma node 768:8584 — מדינות */
+export const countryOptions = ["גרמניה", "ספרד", "ארה״ב", "תורכיה", "שוויץ", "תאילנד"] as const;
+
+/** Figma node 773:82 — נושאים */
+export const topicOptions = [
+  "צעקות",
+  "ויכוח",
+  "מכות",
+  "מיקוח",
+  "תור",
+  "קומבינה",
+  "טיול גדול",
+  "גניבה",
+  "אחר",
+] as const;

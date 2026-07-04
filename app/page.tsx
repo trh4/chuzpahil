@@ -1,13 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { type FormEvent, type ReactNode, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from "react";
 import {
   type Confession,
   type ConfessionDraft,
   type SortValue,
+  countryOptions,
   imagePaths,
   sortLabels,
+  sortOrder,
+  topicOptions,
 } from "./lib/confessions";
 
 const images = {
@@ -20,6 +23,8 @@ const images = {
   hostel: imagePaths.hostel,
   logo: "/images/logo-chutzpah.svg",
   loadingCroissants: "/images/loading-croissants.png",
+  loadingCroissantsPoster: "/images/loading-croissants-poster.png",
+  loadingCroissantsVideo: "/videos/loading-croissants.mp4",
   loadingSuitcase: "/images/loading-suitcase.png",
   marathon: imagePaths.marathon,
   menuBook: "/images/menu-book.svg",
@@ -29,6 +34,9 @@ const images = {
   tour: imagePaths.tour,
   waterpark: imagePaths.waterpark,
 } as const;
+
+const SPLASH_INTRO_DURATION_MS = 2200;
+const REDUCED_MOTION_SPLASH_DURATION_MS = 180;
 
 type CollageImage = {
   src: string;
@@ -47,7 +55,7 @@ const mobileCollage: CollageImage[] = [
     src: images.cafe,
     alt: "Illustration of travelers at a cafe",
     confessionId: "souvenir-mugs",
-    className: "left-[-15%] top-[3%] w-[68vw]",
+    className: "left-[-15%] top-0 w-[68vw]",
     rotate: "-rotate-[16.43deg]",
     priority: true,
   },
@@ -55,7 +63,7 @@ const mobileCollage: CollageImage[] = [
     src: images.waterpark,
     alt: "Illustration of a water park scene",
     confessionId: "bracelet",
-    className: "left-[60%] top-[3%] w-[67vw]",
+    className: "left-[60%] top-0 w-[67vw]",
     rotate: "rotate-[20.07deg]",
     priority: true,
   },
@@ -63,28 +71,28 @@ const mobileCollage: CollageImage[] = [
     src: images.hostel,
     alt: "Illustration of a masked tourist",
     confessionId: "train",
-    className: "left-[-15%] top-[27%] w-[38vw]",
+    className: "left-[-15%] top-[30%] w-[38vw]",
     rotate: "-rotate-[31.18deg]",
   },
   {
     src: images.flipflops,
     alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[72%] top-[30%] w-[41vw]",
+    className: "left-[72%] top-[31%] w-[41vw]",
     rotate: "-rotate-[17.95deg]",
   },
   {
     src: images.dorm,
     alt: "Illustration of travelers sleeping in a shared room",
     confessionId: "budget-room",
-    className: "left-[-26%] top-[45%] w-[55vw]",
+    className: "left-[-26%] top-[48%] w-[58vw]",
     rotate: "-rotate-[12.83deg]",
   },
   {
     src: images.beach,
     alt: "Illustration of tourists on a beach",
     confessionId: "honeymoon",
-    className: "left-[54%] top-[56%] w-[91vw]",
+    className: "left-[54%] top-[58%] w-[91vw]",
     rotate: "rotate-[13.47deg]",
   },
   {
@@ -98,7 +106,7 @@ const mobileCollage: CollageImage[] = [
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[46%] top-[84%] w-[44vw]",
+    className: "left-[46%] top-[75%] w-[44vw]",
     rotate: "-rotate-[20.55deg]",
   },
 ];
@@ -108,7 +116,7 @@ const desktopCollage: CollageImage[] = [
     src: images.cafe,
     alt: "Illustration of travelers at a cafe",
     confessionId: "souvenir-mugs",
-    className: "left-[7%] top-[8%] w-[30vw]",
+    className: "left-[11.1%] top-[8.1%] w-[33.6vw]",
     rotate: "rotate-[11.58deg]",
     priority: true,
   },
@@ -116,14 +124,14 @@ const desktopCollage: CollageImage[] = [
     src: images.flipflops,
     alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[55%] top-[19%] w-[17.5vw]",
+    className: "left-[52.2%] top-[12.4%] w-[17.8vw]",
     rotate: "rotate-[25.36deg]",
   },
   {
     src: images.waterpark,
     alt: "Illustration of a water park scene",
     confessionId: "bracelet",
-    className: "left-[64%] top-[4%] w-[34.5vw]",
+    className: "left-[61.7%] top-0 w-[34.9vw]",
     rotate: "-rotate-[9.89deg]",
     priority: true,
   },
@@ -131,35 +139,35 @@ const desktopCollage: CollageImage[] = [
     src: images.hostel,
     alt: "Illustration of a masked tourist",
     confessionId: "train",
-    className: "left-[-3%] top-[23%] w-[18.5vw]",
+    className: "left-0 top-[19.9%] w-[19.4vw]",
     rotate: "-rotate-[19.05deg]",
   },
   {
     src: images.marathon,
     alt: "Illustration of a runner abroad",
     confessionId: "marathon",
-    className: "left-[82.5%] top-[86%] w-[17.5vw]",
+    className: "left-[79.8%] top-[63.1%] w-[19.8vw]",
     rotate: "-rotate-[15deg]",
   },
   {
     src: images.beach,
     alt: "Illustration of tourists on a beach",
     confessionId: "honeymoon",
-    className: "left-[61%] top-[63%] w-[32vw]",
+    className: "left-[63.8%] top-[48.1%] w-[30vw]",
     rotate: "rotate-[13.47deg]",
   },
   {
     src: images.dorm,
     alt: "Illustration of travelers sleeping in a shared room",
     confessionId: "budget-room",
-    className: "left-[2%] top-[65%] w-[34vw]",
+    className: "left-[4.1%] top-[52.7%] w-[37.9vw]",
     rotate: "-rotate-[12.83deg]",
   },
   {
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[50.5%] top-[86%] w-[21vw]",
+    className: "left-[48.6%] top-[64.3%] w-[21.3vw]",
     rotate: "rotate-[8.85deg]",
   },
 ];
@@ -230,8 +238,10 @@ function Header({
   onSortChange: (value: SortValue) => void;
 }) {
   const filterClass = (active: boolean) =>
-    `rounded-full border px-2 py-0.5 font-sans text-[14px] lg:px-[clamp(12px,0.75vw,18px)] lg:py-[clamp(4px,0.35vw,7px)] lg:text-[clamp(18px,1.25vw,24px)] ${
-      active ? "border-[blue] bg-[#d1e2ff] text-[blue]" : "border-[#998e8a] text-[#745447]"
+    `cursor-pointer appearance-none rounded-[50px] border border-solid bg-transparent px-2 py-0.5 font-sans text-[14px] leading-normal transition-colors lg:px-[12px] lg:py-[4px] lg:text-[18px] 2xl:text-[24px] ${
+      active
+        ? "border-[blue] text-[blue]"
+        : "border-[#998e8a] text-[#745447] hover:border-[blue] hover:bg-[#d1e2ff] hover:text-[blue]"
     }`;
 
   return (
@@ -275,7 +285,7 @@ function Header({
             className="cursor-pointer appearance-none bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:text-[clamp(16px,1.25vw,24px)]"
             aria-label="Sort confessions"
           >
-            {(Object.keys(sortLabels) as SortValue[]).map((value) => (
+            {sortOrder.map((value) => (
               <option key={value} value={value}>
                 {sortLabels[value]}
               </option>
@@ -385,6 +395,28 @@ function HeroContent({
   );
 }
 
+function SplashIntro({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = window.setTimeout(onDone, reduceMotion ? REDUCED_MOTION_SPLASH_DURATION_MS : SPLASH_INTRO_DURATION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [onDone]);
+
+  return (
+    <div
+      aria-hidden="true"
+      className="splash-intro pointer-events-none absolute inset-0 z-25 flex items-center justify-center bg-[#fffaf0] px-[clamp(20px,6vw,72px)]"
+    >
+      <div
+        data-figma-name="פתיח אתר 4"
+        data-figma-node-id="1406:579"
+        className="splash-intro-panel aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0]"
+      />
+    </div>
+  );
+}
+
 function Collage({
   items,
   faded = false,
@@ -436,10 +468,6 @@ function NewConfessionIllustration({ confession }: { confession: Confession }) {
 }
 
 type Screen = "home" | "detail" | "generating" | "preview" | "saving" | "success";
-
-function uniqueValues(values: string[]) {
-  return Array.from(new Set(values)).filter(Boolean);
-}
 
 function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
   return (
@@ -641,7 +669,29 @@ function ConfessionCard({
 }
 
 function LoadingImageScreen({ src }: { src: string }) {
+  const isCroissants = src === images.loadingCroissants;
   const isSuitcase = src === images.loadingSuitcase;
+
+  if (isCroissants) {
+    return (
+      <ScreenCanvas>
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          data-figma-name="לופ העמסת מזון"
+          data-figma-node-id="1115:31631"
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={images.loadingCroissantsPoster}
+          preload="auto"
+          aria-hidden="true"
+        >
+          <source src={images.loadingCroissantsVideo} type="video/mp4" />
+        </video>
+      </ScreenCanvas>
+    );
+  }
 
   return (
     <ScreenCanvas>
@@ -735,6 +785,7 @@ function HomeScreen({
   topics,
   visibleConfessions,
   hasNoResults,
+  showSplashIntro,
   showSuccess,
   newConfession,
   showInstructions,
@@ -742,6 +793,7 @@ function HomeScreen({
   onSubmit,
   onHelp,
   onOpenDetail,
+  onSplashIntroDone,
   onDismissSuccess,
   onSearchChange,
   onCountryChange,
@@ -759,6 +811,7 @@ function HomeScreen({
   topics: string[];
   visibleConfessions: Confession[];
   hasNoResults: boolean;
+  showSplashIntro?: boolean;
   showSuccess?: boolean;
   newConfession?: Confession;
   showInstructions?: boolean;
@@ -766,6 +819,7 @@ function HomeScreen({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onHelp: () => void;
   onOpenDetail: (id: string) => void;
+  onSplashIntroDone: () => void;
   onDismissSuccess: () => void;
   onSearchChange: (value: string) => void;
   onCountryChange: (value: string) => void;
@@ -795,15 +849,15 @@ function HomeScreen({
 
   return (
     <div
-      className="relative flex min-h-dvh w-full flex-col overflow-x-clip bg-[#fffaf0] font-sans text-[#2b2b2b]"
+      className="relative flex h-dvh w-full flex-col overflow-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]"
       dir="rtl"
     >
       {renderHeader()}
-      <main className="relative w-full flex-1 overflow-hidden" aria-label="Homepage hero">
-        <div className="absolute inset-0 lg:hidden">
+      <main className="relative min-h-0 w-full flex-1 overflow-hidden" aria-label="Homepage hero">
+        <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
           <Collage items={mobileItems} onOpenDetail={onOpenDetail} />
         </div>
-        <div className="absolute inset-0 hidden lg:block">
+        <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden lg:block">
           <Collage items={desktopItems} onOpenDetail={onOpenDetail} />
         </div>
         {newConfession ? <NewConfessionIllustration confession={newConfession} /> : null}
@@ -814,6 +868,7 @@ function HomeScreen({
           onSubmit={onSubmit}
           onHelp={onHelp}
         />
+        {showSplashIntro ? <SplashIntro onDone={onSplashIntroDone} /> : null}
         {showInstructions ? <InstructionsCard /> : null}
         {showSuccess ? <SuccessToast onDismiss={onDismissSuccess} /> : null}
         {hasNoResults ? <EmptyState onReset={onResetFilters} /> : null}
@@ -867,13 +922,15 @@ export default function Home() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showSplashIntro, setShowSplashIntro] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const visibleConfessions = confessions;
-  const countries = uniqueValues(confessions.map((item) => item.country));
-  const topics = uniqueValues(confessions.map((item) => item.topic));
+  const countries = [...countryOptions];
+  const topics = [...topicOptions];
   const selectedConfession = confessions.find((item) => item.id === selectedConfessionId);
   const previewConfession = draft ? draftToConfession(draft) : undefined;
+  const hideSplashIntro = useCallback(() => setShowSplashIntro(false), []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1113,6 +1170,7 @@ export default function Home() {
       topics={topics}
       visibleConfessions={visibleConfessions}
       hasNoResults={hasLoaded && visibleConfessions.length === 0}
+      showSplashIntro={showSplashIntro}
       showSuccess={screen === "success" && showSuccessToast}
       newConfession={newConfession}
       showInstructions={showInstructions}
@@ -1130,6 +1188,7 @@ export default function Home() {
         setActionError(undefined);
         setScreen("detail");
       }}
+      onSplashIntroDone={hideSplashIntro}
       onDismissSuccess={() => setShowSuccessToast(false)}
       onSearchChange={setSearch}
       onCountryChange={setCountry}
