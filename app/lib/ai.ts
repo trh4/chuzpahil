@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import { toFile } from "openai/uploads";
+import { readFile, readdir } from "fs/promises";
+import path from "path";
 import { saveImage } from "./images";
 
 type GeneratedConfession = {
@@ -22,6 +25,21 @@ type AiValidationResponse =
       valid: false;
       error: string;
     };
+
+const STYLE_REFERENCE_DIR_CANDIDATES = [
+  process.env.AI_STYLE_REFERENCE_DIR,
+  path.resolve(process.cwd(), "docs", "תמונות רפרנס לAI"),
+  path.resolve(process.cwd(), "..", "docs", "תמונות רפרנס לAI"),
+].filter((directory): directory is string => Boolean(directory));
+const STYLE_REFERENCE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const STYLE_REFERENCE_CONTENT_TYPES = new Map([
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".png", "image/png"],
+  [".webp", "image/webp"],
+]);
+
+let styleReferenceImagePaths: Promise<string[]> | undefined;
 
 export class PromptValidationError extends Error {
   constructor(message: string) {
@@ -174,57 +192,138 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
 
 function safeVisualStory(confession: GeneratedConfession) {
   const text = `${confession.title} ${confession.content} ${confession.tags.join(" ")}`;
+  const location = confession.country === "אחר" ? "an overseas travel destination" : confession.country;
 
   if (/פיל|פילים|חיה|חיות/.test(text) && /הרבצ|בעט|מכה|הכיתי|מטאטא/.test(text)) {
-    return `A tourist at an elephant washing activity in ${confession.country} stands awkwardly with a broom lowered, looking embarrassed. A calm elephant and a local guide look surprised. Show only the non-violent aftermath, with no hitting or harm.`;
+    return `A tourist at an elephant washing activity in ${location} stands awkwardly with a broom lowered, looking sheepish. A calm elephant and a local guide look surprised from a comfortable distance.`;
   }
 
-  if (/ירק|הרבצ|בעט|דחפ|מכה|הכיתי/.test(text)) {
-    return `A tourist in ${confession.country} looks embarrassed after causing an awkward social incident, while nearby locals react with surprise. Show only the aftermath, no physical contact, no bodily fluids, no harm.`;
+  if (/טוקטוק|טוק טוק|מונית|נהג|אוטובוס|רכבת|נסיעה/.test(text)) {
+    return `A tourist beside local transportation in ${location} gestures too dramatically while a calm local driver looks confused. The scene feels like a funny travel-etiquette mix-up.`;
   }
 
-  return confession.content;
+  if (/צעק|צרח|קלל|ירק|הרבצ|בעט|דחפ|מכה|הכיתי/.test(text)) {
+    return `A tourist in ${location} looks sheepish after an awkward etiquette mistake, while nearby locals react with puzzled expressions. Keep it playful and symbolic.`;
+  }
+
+  return `A playful travel scene in ${location} about ${confession.topic}, shown as a light social misunderstanding with expressive body language and clear local context.`;
 }
 
-function imagePrompt(confession: GeneratedConfession, variant: number) {
+function imagePrompt(confession: GeneratedConfession, variant: number, safest = false) {
   return [
-    "Create a square colorful comic-style illustration for a humorous Israeli travel confession.",
+    "Create a square colorful comic-style illustration for a humorous Israeli travel anecdote.",
+    "Use the attached images only as design-language references: match their illustration style, palette, character treatment, composition energy, and overall visual tone. Do not copy their exact scenes, characters, text, or layouts.",
     "Style: bold flat shapes, warm cream background, saturated blues/reds/yellows, expressive characters, playful editorial cartoon, no text, no captions, no logos.",
-    "If the story includes rude or aggressive behavior, depict the awkward social situation or aftermath in a non-violent symbolic way; do not show physical assault, bodily fluids, gore, or humiliation.",
+    "Keep the scene friendly, symbolic, and suitable for a lighthearted public gallery.",
     `Variant: ${variant === 1 ? "wide scene with clear location context" : "closer character-focused scene with a different composition"}.`,
-    `Title: ${confession.title}`,
     `Country/location: ${confession.country}`,
-    `Topic: ${confession.topic}`,
-    `Visual scene brief: ${safeVisualStory(confession)}`,
+    safest ? "Visual scene brief: A tourist has a funny etiquette misunderstanding near local transportation or a recognizable travel setting. Everyone is expressive, safe, and cartoonishly surprised." : `Topic: ${confession.topic}`,
+    safest ? "Use only friendly expressions, open poses, clear travel context, and simple visual humor." : `Visual scene brief: ${safeVisualStory(confession)}`,
   ].join("\n");
+}
+
+async function readStyleReferenceImagePaths(directory: string) {
+  try {
+    const files = await readdir(directory);
+
+    const imagePaths = files
+      .filter((fileName) => STYLE_REFERENCE_EXTENSIONS.has(path.extname(fileName).toLowerCase()))
+      .sort((first, second) => first.localeCompare(second))
+      .slice(0, 16)
+      .map((fileName) => path.join(directory, fileName));
+
+    if (imagePaths.length > 0) {
+      return imagePaths;
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  return [];
+}
+
+function getStyleReferenceImagePaths() {
+  styleReferenceImagePaths ??= (async () => {
+    for (const directory of STYLE_REFERENCE_DIR_CANDIDATES) {
+      const imagePaths = await readStyleReferenceImagePaths(directory);
+
+      if (imagePaths.length > 0) {
+        return imagePaths;
+      }
+    }
+
+    throw new Error(`No style reference images found in: ${STYLE_REFERENCE_DIR_CANDIDATES.join(", ")}`);
+  })();
+
+  return styleReferenceImagePaths;
+}
+
+async function createStyleReferenceFile(imagePath: string, index: number) {
+  const extension = path.extname(imagePath).toLowerCase();
+  const contentType = STYLE_REFERENCE_CONTENT_TYPES.get(extension);
+
+  if (!contentType) {
+    throw new Error(`Unsupported style reference image type: ${imagePath}`);
+  }
+
+  return toFile(await readFile(imagePath), `style-reference-${index + 1}${extension}`, { type: contentType });
 }
 
 async function uploadImage(b64Json: string) {
   return saveImage(Buffer.from(b64Json, "base64"), "image/png");
 }
 
+function isImageSafetyRejection(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return /safety system|safety_violations|rejected by the safety/i.test(message);
+}
+
+async function generateImageWithReferences(
+  client: OpenAI,
+  referenceImages: File[],
+  confession: GeneratedConfession,
+  variant: number,
+  safest = false,
+) {
+  const image = await client.images.edit({
+    model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1",
+    image: referenceImages,
+    prompt: imagePrompt(confession, variant, safest),
+    input_fidelity: "high",
+    n: 1,
+    size: "1024x1024",
+    quality: "low",
+    output_format: "png",
+  });
+
+  const b64Json = image.data?.[0]?.b64_json;
+
+  if (!b64Json) {
+    throw new Error("OpenAI did not return generated image data");
+  }
+
+  return uploadImage(b64Json);
+}
+
 export async function generateImageOptions(confession: GeneratedConfession) {
   const client = getOpenAI();
+  const referenceImagePaths = await getStyleReferenceImagePaths();
+  const referenceImages = await Promise.all(referenceImagePaths.map(createStyleReferenceFile));
 
   return Promise.all(
     [1, 2].map(async (variant) => {
-      const image = await client.images.generate({
-        model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1",
-        prompt: imagePrompt(confession, variant),
-        n: 1,
-        size: "1024x1024",
-        quality: "low",
-        output_format: "png",
-        moderation: "low",
-      });
+      try {
+        return await generateImageWithReferences(client, referenceImages, confession, variant);
+      } catch (error) {
+        if (!isImageSafetyRejection(error)) {
+          throw error;
+        }
 
-      const b64Json = image.data?.[0]?.b64_json;
-
-      if (!b64Json) {
-        throw new Error("OpenAI did not return generated image data");
+        return generateImageWithReferences(client, referenceImages, confession, variant, true);
       }
-
-      return uploadImage(b64Json);
     }),
   );
 }
