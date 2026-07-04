@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   type Confession,
   type ConfessionDraft,
@@ -116,7 +116,7 @@ const desktopCollage: CollageImage[] = [
     src: images.cafe,
     alt: "Illustration of travelers at a cafe",
     confessionId: "souvenir-mugs",
-    className: "left-[11.1%] top-[8.1%] w-[33.6vw]",
+    className: "left-[11%] top-[9.5%] w-[36.3vw] 2xl:left-[14.2%] 2xl:top-[7%] 2xl:w-[30vw]",
     rotate: "rotate-[11.58deg]",
     priority: true,
   },
@@ -124,14 +124,14 @@ const desktopCollage: CollageImage[] = [
     src: images.flipflops,
     alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[52.2%] top-[12.4%] w-[17.8vw]",
+    className: "left-[51.3%] top-[15.1%] w-[21.8vw] 2xl:left-[60.9%] 2xl:top-[19%] 2xl:w-[17.4vw]",
     rotate: "rotate-[25.36deg]",
   },
   {
     src: images.waterpark,
     alt: "Illustration of a water park scene",
     confessionId: "bracelet",
-    className: "left-[61.7%] top-0 w-[34.9vw]",
+    className: "left-[62%] top-[-1.3%] w-[43.3vw] 2xl:left-[63.8%] 2xl:top-[-5%] 2xl:w-[34.5vw]",
     rotate: "-rotate-[9.89deg]",
     priority: true,
   },
@@ -139,35 +139,35 @@ const desktopCollage: CollageImage[] = [
     src: images.hostel,
     alt: "Illustration of a masked tourist",
     confessionId: "train",
-    className: "left-0 top-[19.9%] w-[19.4vw]",
+    className: "left-[-7.7%] top-[34.1%] w-[22.6vw] 2xl:left-[-3%] 2xl:top-[31%] 2xl:w-[18.6vw]",
     rotate: "-rotate-[19.05deg]",
   },
   {
     src: images.marathon,
     alt: "Illustration of a runner abroad",
     confessionId: "marathon",
-    className: "left-[79.8%] top-[63.1%] w-[19.8vw]",
+    className: "left-[82.5%] top-[82.7%] w-[22.2vw] 2xl:left-[82.6%] 2xl:top-[100%] 2xl:w-[17.7vw]",
     rotate: "-rotate-[15deg]",
   },
   {
     src: images.beach,
     alt: "Illustration of tourists on a beach",
     confessionId: "honeymoon",
-    className: "left-[63.8%] top-[48.1%] w-[30vw]",
+    className: "left-[64.4%] top-[62.7%] w-[33.1vw] 2xl:left-[67%] 2xl:top-[63.8%] 2xl:w-[31.9vw]",
     rotate: "rotate-[13.47deg]",
   },
   {
     src: images.dorm,
     alt: "Illustration of travelers sleeping in a shared room",
     confessionId: "budget-room",
-    className: "left-[4.1%] top-[52.7%] w-[37.9vw]",
+    className: "left-[-3%] top-[80.8%] w-[41.4vw] 2xl:left-[2%] 2xl:top-[84%] 2xl:w-[34.2vw]",
     rotate: "-rotate-[12.83deg]",
   },
   {
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[48.6%] top-[64.3%] w-[21.3vw]",
+    className: "left-[47.2%] top-[84.3%] w-[22.2vw] 2xl:left-[53.4%] 2xl:top-[93.6%] 2xl:w-[20.9vw]",
     rotate: "rotate-[8.85deg]",
   },
 ];
@@ -214,6 +214,95 @@ function FloatingIllustration({
   );
 }
 
+type DropdownOption<Value extends string> = {
+  value: Value;
+  label: string;
+};
+
+function CustomDropdown<Value extends string>({
+  value,
+  options,
+  ariaLabel,
+  onChange,
+  triggerClassName,
+  panelClassName,
+  optionClassName,
+  renderTrigger,
+}: {
+  value: Value;
+  options: DropdownOption<Value>[];
+  ariaLabel: string;
+  onChange: (value: Value) => void;
+  triggerClassName: string;
+  panelClassName: string;
+  optionClassName: string;
+  renderTrigger?: (label: string, open: boolean) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? options[0]?.label ?? "";
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        className={triggerClassName}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {renderTrigger ? renderTrigger(selectedLabel, open) : selectedLabel}
+      </button>
+      {open ? (
+        <div role="listbox" aria-label={ariaLabel} className={panelClassName}>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              className={optionClassName}
+              onClick={() => {
+                onChange(option.value);
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Header({
   search,
   country,
@@ -237,8 +326,15 @@ function Header({
   onTopicChange: (value: string) => void;
   onSortChange: (value: SortValue) => void;
 }) {
+  const sortOptions = sortOrder.map((value) => ({ value, label: sortLabels[value] }));
+  const countryDropdownOptions = countries.map((value) => ({ value, label: value }));
+  const topicDropdownOptions = topics.map((value) => ({ value, label: value }));
+  const dropdownPanelClass =
+    "absolute right-0 top-[calc(100%+8px)] z-50 flex w-[81px] flex-col items-stretch border border-[#998e8a] bg-[#fffcf8] text-right shadow-[2px_3px_8px_rgba(0,0,0,0.12)] lg:w-[104px] 2xl:w-[132px]";
+  const dropdownOptionClass =
+    "flex h-[29px] w-full items-center justify-end border-b border-[#998e8a] px-[9px] py-0 text-right font-sans text-[14px] leading-normal text-[#745447] transition-colors last:border-b-0 hover:bg-[#d1e2ff] hover:text-[blue] focus:bg-[#d1e2ff] focus:text-[blue] focus:outline-none lg:h-[34px] lg:text-[18px] 2xl:h-[39px] 2xl:text-[24px]";
   const filterClass = (active: boolean) =>
-    `cursor-pointer appearance-none rounded-[50px] border border-solid bg-transparent px-2 py-0.5 font-sans text-[14px] leading-normal transition-colors lg:px-[12px] lg:py-[4px] lg:text-[18px] 2xl:text-[24px] ${
+    `inline-flex min-w-[43px] items-center justify-center rounded-[50px] border border-solid bg-transparent px-2 py-0.5 text-center font-sans text-[14px] leading-normal transition-colors lg:min-w-[58px] lg:px-[12px] lg:py-[4px] lg:text-[18px] 2xl:min-w-[69px] 2xl:text-[24px] ${
       active
         ? "border-[blue] text-[blue]"
         : "border-[#998e8a] text-[#745447] hover:border-[blue] hover:bg-[#d1e2ff] hover:text-[blue]"
@@ -246,7 +342,7 @@ function Header({
 
   return (
     <header
-      className="relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-clip border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
+      className="relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-visible border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
       dir="ltr"
     >
       <label
@@ -273,60 +369,54 @@ function Header({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="חיפוש חופשי"
           dir="rtl"
-          className="hidden min-w-0 flex-1 bg-transparent text-right font-sans text-[clamp(18px,1.25vw,24px)] text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block"
+          className="hidden min-w-0 flex-1 bg-transparent text-right font-sans text-[18px] text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block 2xl:text-[24px]"
         />
       </label>
 
       <nav className="flex min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)]" dir="rtl">
-        <label className="flex shrink-0 items-center justify-center gap-1 text-[#0013be] lg:gap-[clamp(6px,0.45vw,8.269px)]">
-          <select
-            value={sort}
-            onChange={(event) => onSortChange(event.target.value as SortValue)}
-            className="cursor-pointer appearance-none bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:text-[clamp(16px,1.25vw,24px)]"
-            aria-label="Sort confessions"
-          >
-            {sortOrder.map((value) => (
-              <option key={value} value={value}>
-                {sortLabels[value]}
-              </option>
-            ))}
-          </select>
-          <span className="relative h-2 w-1 -rotate-90 lg:h-[clamp(11px,0.76vw,14.603px)] lg:w-[clamp(6px,0.45vw,8.598px)]">
-            <Image src={images.arrow} alt="" fill sizes="15px" />
-          </span>
-        </label>
+        <CustomDropdown
+          value={sort}
+          ariaLabel="Sort confessions"
+          options={sortOptions}
+          onChange={onSortChange}
+          triggerClassName="flex shrink-0 items-center justify-center gap-1 bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:gap-[6px] lg:text-[16px] 2xl:text-[24px]"
+          panelClassName={dropdownPanelClass}
+          optionClassName={dropdownOptionClass}
+          renderTrigger={(label) => (
+            <>
+              <span className="relative h-2 w-1 -rotate-90 lg:h-[11px] lg:w-[6px] 2xl:h-[14.6px] 2xl:w-[8.6px]">
+                <Image src={images.arrow} alt="" fill sizes="15px" />
+              </span>
+              <span>{label}</span>
+            </>
+          )}
+        />
 
         <div className="flex min-w-0 items-center gap-[5px]">
           <span className="relative size-[14px] shrink-0 lg:size-[clamp(16px,1.3vw,24.873px)]">
             <Image src={images.discoverTune} alt="" fill sizes="25px" />
           </span>
           <div className="flex items-center gap-1.5 lg:gap-[clamp(10px,0.75vw,14px)]">
-            <select
+            <CustomDropdown
               value={country}
-              onChange={(event) => onCountryChange(event.target.value)}
-              className={filterClass(Boolean(country))}
-              aria-label="Filter by country"
-            >
-              <option value="">מדינה</option>
-              {countries.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-            <select
+              ariaLabel="Filter by country"
+              options={countryDropdownOptions}
+              onChange={onCountryChange}
+              triggerClassName={filterClass(Boolean(country))}
+              panelClassName={`${dropdownPanelClass} overflow-hidden rounded-[10px]`}
+              optionClassName={dropdownOptionClass}
+              renderTrigger={(label) => <span className="w-full text-center">{country ? label : "מדינה"}</span>}
+            />
+            <CustomDropdown
               value={topic}
-              onChange={(event) => onTopicChange(event.target.value)}
-              className={filterClass(Boolean(topic))}
-              aria-label="Filter by topic"
-            >
-              <option value="">נושא</option>
-              {topics.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
+              ariaLabel="Filter by topic"
+              options={topicDropdownOptions}
+              onChange={onTopicChange}
+              triggerClassName={filterClass(Boolean(topic))}
+              panelClassName={`${dropdownPanelClass} overflow-hidden rounded-[10px]`}
+              optionClassName={dropdownOptionClass}
+              renderTrigger={(label) => <span className="w-full text-center">{topic ? label : "נושא"}</span>}
+            />
           </div>
         </div>
       </nav>
@@ -348,18 +438,18 @@ function HeroContent({
   onHelp: () => void;
 }) {
   return (
-    <section className="relative z-20 mx-auto mt-[clamp(140px,26dvh,340px)] flex w-full max-w-[1046px] flex-col items-center gap-[clamp(9px,1.2vw,20px)] px-5">
-      <div className="flex w-full flex-col items-center gap-[clamp(14px,1.5vw,28px)]">
+    <section className="relative z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:mt-[309px] lg:gap-[19px] 2xl:mt-[373px]">
+      <div className="flex w-full flex-col items-center gap-[14px] lg:gap-[19px] 2xl:gap-[28px]">
         <div className="flex flex-col items-center">
-          <div className="relative aspect-482/196 w-[clamp(186px,25vw,482px)]">
+          <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
             <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" />
           </div>
-          <p className="font-ploni-yad mt-[-0.05em] text-center text-[clamp(50px,6.7vw,128px)] leading-none text-[#2b2b2b]">
+          <p className="font-ploni-yad mt-[-0.05em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
             איי.אל
           </p>
         </div>
 
-        <p className="max-w-[min(60vw,700px)] text-center text-[clamp(14px,1.35vw,26px)] leading-[1.16] text-[#2b2b2b]">
+        <p className="max-w-[195px] text-center text-[14px] leading-[1.16] text-[#2b2b2b] lg:max-w-[323px] lg:text-[20px] 2xl:max-w-[1046px] 2xl:text-[24px]">
           ווידויים של ישראלים בחו״ל שהם רמה גבוהה של רמה נמוכה
         </p>
       </div>
@@ -368,11 +458,11 @@ function HeroContent({
         onSubmit={onSubmit}
         className="flex w-full max-w-[min(92vw,1046px)] items-center justify-end overflow-hidden rounded-full border-2 border-[blue] bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
       >
-        <span className="flex w-full items-center gap-[clamp(7px,1.3vw,26px)]">
+        <span className="flex w-full items-center gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]">
           <button
             type="button"
             onClick={onHelp}
-            className="relative size-[clamp(24px,2.3vw,45px)] shrink-0"
+            className="relative size-[24px] shrink-0 lg:size-[34.125px] 2xl:size-[45px]"
             aria-label="Prompt writing instructions"
           >
             <Image src={images.menuBook} alt="" fill sizes="45px" />
@@ -382,12 +472,12 @@ function HeroContent({
             onChange={(event) => onPromptChange(event.target.value)}
             placeholder="לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול...."
             dir="rtl"
-            className="min-w-0 flex-1 overflow-hidden bg-transparent text-right font-sans text-[clamp(14px,1.25vw,24px)] text-ellipsis whitespace-nowrap text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none"
+            className="min-w-0 flex-1 overflow-hidden bg-transparent text-right font-sans text-[14px] text-ellipsis whitespace-nowrap text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
           />
         </span>
       </form>
       {error ? (
-        <p className="max-w-[290px] text-center text-[12px] leading-snug text-[blue] lg:max-w-none lg:text-[14px]">
+        <p className="max-w-[290px] text-center text-[14px] leading-snug text-[blue] lg:max-w-none lg:text-[20px] 2xl:text-[24px]">
           {error}
         </p>
       ) : null}
@@ -515,7 +605,7 @@ function ScreenCanvas({ children }: { children: ReactNode }) {
 
 function TagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-[#998e8a] px-2 py-0.5 font-sans text-[14px] text-[#745447]">
+    <span className="rounded-full border border-[#998e8a] px-2 py-0.5 font-sans text-[14px] text-[#745447] lg:text-[18px] 2xl:text-[24px]">
       {children}
     </span>
   );
@@ -563,7 +653,7 @@ function ConfessionCard({
         >
           <Image src={image} alt={confession.title} fill priority className="object-cover" sizes="342px" />
           {flashRating !== undefined ? (
-            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 px-6 py-3 text-[34px] font-bold text-[blue] shadow-[3px_3px_18px_rgba(0,0,0,0.25)]">
+            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 px-6 py-3 text-[34px] font-bold text-[blue] shadow-[3px_3px_18px_rgba(0,0,0,0.25)] 2xl:text-[52px]">
               {flashRating}%
             </div>
           ) : null}
@@ -604,7 +694,7 @@ function ConfessionCard({
         <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:w-[430px] lg:justify-center lg:p-10 2xl:w-[560px] 2xl:p-16">
           <div className="flex w-full flex-col items-end gap-[13px]">
             <div className="flex w-full flex-col items-end gap-1.5">
-              {isPreview ? <p className="text-[14px] text-[blue]">* תצוגה לפני פרסום</p> : null}
+              {isPreview ? <p className="text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">* תצוגה לפני פרסום</p> : null}
               <div className="flex w-full flex-col items-end gap-0.5">
                 <h1 className="font-haim text-[26px] leading-none text-[blue] lg:text-[46px] 2xl:text-[64px]">{confession.title}</h1>
                 <p className="text-[14px] text-[#998e8a] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
@@ -631,24 +721,24 @@ function ConfessionCard({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b]"
+            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] 2xl:text-[24px]"
           >
             ביטול
           </button>
           <button
             type="button"
             onClick={() => onPublish?.(image)}
-            className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8]"
+            className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] 2xl:w-[134px] 2xl:text-[24px]"
           >
             פרסום ↑
           </button>
-          {actionError ? <p className="max-w-[300px] text-right text-[14px] text-[blue]">{actionError}</p> : null}
+          {actionError ? <p className="max-w-[300px] text-right text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">{actionError}</p> : null}
         </div>
       ) : (
         <div className="flex w-[296px] flex-col items-end justify-center lg:w-[760px] 2xl:w-[1040px]">
           <p className="w-full text-right text-[14px] font-bold lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
           <div className="relative h-[63px] w-full lg:h-[82px]">
-            <span className="absolute left-0 top-1 rounded-[5px] bg-[#fffcf8] px-2 text-[14px] shadow-[1px_1px_4px_0px_rgba(0,0,0,0.25)]">
+            <span className="absolute left-0 top-1 rounded-[5px] bg-[#fffcf8] px-2 text-[14px] shadow-[1px_1px_4px_0px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:text-[24px]">
               {rating ?? 0}%
             </span>
             <input
@@ -704,7 +794,7 @@ function LoadingImageScreen({ src }: { src: string }) {
           <div className="flex h-[296px] w-[360px] items-center justify-center 2xl:h-[460px] 2xl:w-[620px]">
             <div className="text-[150px] leading-none 2xl:text-[230px]">{isSuitcase ? "🧳" : "🥐"}</div>
           </div>
-          <p className="text-center text-[20px] text-[#2b2b2b] 2xl:text-[30px]">
+          <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
             {isSuitcase ? "מוסיף את הוידוי שלך..." : "מעמיס רגע כמה נתונים"}
           </p>
         </div>
@@ -726,15 +816,15 @@ function Modal({
 }) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-[rgba(255,250,240,0.72)] px-6 backdrop-blur-sm">
-      <div className="flex w-[330px] flex-col items-center gap-4 rounded-[18px] border border-[#998e8a] bg-[#fffcf8] p-6 text-center shadow-[6px_6px_20px_rgba(0,0,0,0.18)]">
-        <h2 className="font-haim text-[24px] text-[blue]">{title}</h2>
-        <div className="text-[14px] leading-[1.45] text-[#2b2b2b]">{children}</div>
+      <div className="flex w-[330px] flex-col items-center gap-4 rounded-[18px] border border-[#998e8a] bg-[#fffcf8] p-6 text-center shadow-[6px_6px_20px_rgba(0,0,0,0.18)] lg:w-[466px] 2xl:w-[780px]">
+        <h2 className="font-haim text-[24px] text-[blue] lg:text-[30px] 2xl:text-[52px]">{title}</h2>
+        <div className="text-[14px] leading-[1.45] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]">{children}</div>
         <div className="flex gap-3">
-          <button type="button" onClick={onCancel} className="rounded-full border border-[#998e8a] px-5 py-1.5">
+          <button type="button" onClick={onCancel} className="rounded-full border border-[#998e8a] px-5 py-1.5 text-[14px] lg:text-[18px] 2xl:text-[24px]">
             חזרה
           </button>
           {onConfirm ? (
-            <button type="button" onClick={onConfirm} className="rounded-full bg-[blue] px-5 py-1.5 text-[#fffcf8]">
+            <button type="button" onClick={onConfirm} className="rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8] lg:text-[18px] 2xl:text-[24px]">
               אישור
             </button>
           ) : null}
@@ -747,8 +837,8 @@ function Modal({
 function EmptyState({ onReset }: { onReset: () => void }) {
   return (
     <div className="absolute left-1/2 top-[65%] z-30 flex -translate-x-1/2 flex-col items-center gap-3 rounded-[18px] border border-[#998e8a] bg-[#fffcf8]/95 px-6 py-5 text-center shadow-[6px_6px_18px_rgba(0,0,0,0.15)]">
-      <p className="text-[16px] text-[#2b2b2b]">לא נמצאו וידויים מתאימים</p>
-      <button type="button" onClick={onReset} className="rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8]">
+      <p className="text-[16px] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]">לא נמצאו וידויים מתאימים</p>
+      <button type="button" onClick={onReset} className="rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8] lg:text-[18px] 2xl:text-[24px]">
         איפוס סינון
       </button>
     </div>
@@ -757,15 +847,15 @@ function EmptyState({ onReset }: { onReset: () => void }) {
 
 function InstructionsCard() {
   return (
-    <div className="absolute left-1/2 top-[60%] z-30 flex w-[min(92vw,640px)] -translate-x-1/2 flex-col gap-[clamp(12px,1vw,20px)] rounded-[clamp(18px,1.4vw,26px)] bg-[#fffcf8] p-[clamp(20px,1.7vw,32px)] text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)]">
-      <h2 className="font-haim text-[22px] text-[blue] lg:text-[28px]">איך לכתוב וידוי טוב?</h2>
+    <div className="absolute left-1/2 top-[60%] z-30 flex w-[min(92vw,640px)] -translate-x-1/2 flex-col gap-[12px] rounded-[18px] bg-[#fffcf8] p-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:w-[796px] lg:gap-4 lg:rounded-[24px] lg:p-8 2xl:w-[1046px] 2xl:gap-5 2xl:rounded-[26px]">
+      <h2 className="font-haim text-[22px] text-[blue] lg:text-[30px] 2xl:text-[52px]">איך לכתוב וידוי טוב?</h2>
       {[
         ["✓", "ספרו איפה זה קרה ובאיזו מדינה"],
         ["✓", "תארו מה עשיתם או מה ראיתם בפועל"],
         ["!", "הוסיפו מי היה מעורב ומה הייתה הסיטואציה"],
         ["×", "אל תסתפקו במשפט קצר מדי"],
       ].map(([icon, text]) => (
-        <p key={text} className="flex items-center justify-end gap-3 text-[14px] text-[#2b2b2b] lg:text-[18px]">
+        <p key={text} className="flex items-center justify-end gap-3 text-[14px] text-[#2b2b2b] lg:text-[20px] 2xl:text-[30px]">
           <span>{text}</span>
           <span className="flex size-6 items-center justify-center rounded-full border border-[blue] text-[blue]">{icon}</span>
         </p>
