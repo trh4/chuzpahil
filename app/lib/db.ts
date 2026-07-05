@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless";
-import type { Confession, ConfessionDraft } from "./confessions";
+import { imagePaths, type Confession, type ConfessionDraft } from "./confessions";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is missing");
@@ -49,6 +49,8 @@ export function mapConfession(row: Record<string, unknown>): Confession {
   const createdAtValue = row.created_at as string | Date;
   const createdAt = new Date(createdAtValue).toISOString();
   const averageScore = Number(row.average_chutzpah_score ?? 0);
+  const seedKey = stringValue(row.seed_key);
+  const imageUrl = stringValue(row.image_url);
 
   return {
     id: stringValue(row.id),
@@ -60,7 +62,7 @@ export function mapConfession(row: Record<string, unknown>): Confession {
     country: stringValue(row.country, "אחר"),
     topic: stringValue(row.topic, "אחר"),
     tags: stringArrayValue(row.tags),
-    image: stringValue(row.image_url),
+    image: seedKey === "honeymoon" ? imagePaths.beach : seedKey === "gozleme" ? imagePaths.tour : imageUrl,
     averageScore: Math.round(averageScore),
     ratingsCount: Number(row.ratings_count),
   };

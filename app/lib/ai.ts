@@ -211,9 +211,11 @@ function safeVisualStory(confession: GeneratedConfession) {
 
 function imagePrompt(confession: GeneratedConfession, variant: number, safest = false) {
   return [
-    "Create a square colorful comic-style illustration for a humorous Israeli travel anecdote.",
-    "Use the attached images only as design-language references: match their illustration style, palette, character treatment, composition energy, and overall visual tone. Do not copy their exact scenes, characters, text, or layouts.",
-    "Style: bold flat shapes, warm cream background, saturated blues/reds/yellows, expressive characters, playful editorial cartoon, no text, no captions, no logos.",
+    "Create a square image for a humorous Israeli travel anecdote.",
+    "The background must always look like a realistic travel photograph with natural lighting, real-world depth, and recognizable location details.",
+    "All people and characters must always be illustrated/cartoon characters composited into the realistic photographed background.",
+    "Use the attached images only as references for the illustrated characters: match their palette, expressive treatment, and playful editorial-cartoon energy. Do not copy their exact scenes, characters, text, or layouts.",
+    "Style: photorealistic environment, illustrated characters, saturated blues/reds/yellows, no text, no captions, no logos.",
     "Keep the scene friendly, symbolic, and suitable for a lighthearted public gallery.",
     `Variant: ${variant === 1 ? "wide scene with clear location context" : "closer character-focused scene with a different composition"}.`,
     `Country/location: ${confession.country}`,

@@ -63,6 +63,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ dra
       )
       RETURNING
         id,
+        seed_key,
         title,
         content,
         country,

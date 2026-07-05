@@ -1,7 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type FormEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   type Confession,
   type ConfessionDraft,
@@ -31,6 +39,7 @@ const images = {
   passport: imagePaths.passport,
   search: "/images/search-icon.svg",
   searchMobile: "/images/search-icon-mobile.svg",
+  splashIntroVideo: "/videos/splash-intro.mp4",
   tour: imagePaths.tour,
   waterpark: imagePaths.waterpark,
 } as const;
@@ -45,6 +54,7 @@ type CollageImage = {
   /** Absolute position (% of the page) + width (vw), fully fluid. */
   className: string;
   rotate: string;
+  style?: CSSProperties;
   priority?: boolean;
 };
 
@@ -180,6 +190,7 @@ function FloatingIllustration({
   alt,
   className,
   rotate,
+  style,
   priority,
   faded,
   onClick,
@@ -205,6 +216,7 @@ function FloatingIllustration({
   return (
     <div
       className={`absolute flex aspect-square items-center justify-center transition-transform duration-300 ease-out hover:z-20 hover:scale-110 ${className}`}
+      style={style}
     >
       {onClick ? (
         <button type="button" onClick={onClick} className="flex size-full cursor-pointer items-center justify-center">
@@ -329,9 +341,13 @@ function Header({
   onTopicChange: (value: string) => void;
   onSortChange: (value: SortValue) => void;
 }) {
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const sortOptions = sortOrder.map((value) => ({ value, label: sortLabels[value] }));
   const countryDropdownOptions = countries.map((value) => ({ value, label: value }));
   const topicDropdownOptions = topics.map((value) => ({ value, label: value }));
+  const searchActive = searchFocused || mobileSearchOpen || search.length > 0;
   const dropdownPanelClass =
     "absolute right-0 top-[calc(100%+8px)] z-50 flex w-[81px] flex-col items-stretch border border-[#998e8a] bg-[#fffcf8] text-right shadow-[2px_3px_8px_rgba(0,0,0,0.12)] lg:w-[104px] 2xl:w-[132px]";
   const dropdownOptionClass =
@@ -343,13 +359,42 @@ function Header({
         : "border-[#998e8a] text-[#745447] hover:border-[blue] hover:bg-[#d1e2ff] hover:text-[blue]"
     }`;
 
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [mobileSearchOpen]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileSearchOpen(false);
+        setSearchFocused(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <header
       className="relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-visible border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
       dir="ltr"
     >
       <label
-        className="flex min-w-0 items-center justify-center rounded-full p-[6px] lg:w-[clamp(290px,29.5vw,567px)] lg:justify-between lg:border lg:border-[#998e8a] lg:px-[clamp(15px,1.2vw,22px)] lg:py-[clamp(6px,0.55vw,10px)]"
+        className={`flex min-w-0 items-center rounded-full transition-colors ${
+          mobileSearchOpen
+            ? "w-[min(72vw,290px)] justify-between border border-[blue] px-[10px] py-[4px]"
+            : "justify-center p-[6px]"
+        } lg:w-[clamp(290px,29.5vw,567px)] lg:justify-between lg:border lg:px-[clamp(15px,1.2vw,22px)] lg:py-[clamp(6px,0.55vw,10px)] ${
+          searchActive ? "lg:border-[blue]" : "lg:border-[#998e8a]"
+        }`}
+        onClick={() => {
+          if (!mobileSearchOpen) {
+            setMobileSearchOpen(true);
+          }
+        }}
       >
         <span className="relative h-[12px] w-[10px] shrink-0 lg:h-[clamp(18px,1.15vw,22px)] lg:w-[clamp(15px,1vw,19px)]">
           <Image
@@ -368,15 +413,24 @@ function Header({
           />
         </span>
         <input
+          ref={searchInputRef}
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="חיפוש חופשי"
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => {
+            setSearchFocused(false);
+            if (!search.trim()) {
+              setMobileSearchOpen(false);
+            }
+          }}
+          placeholder={searchActive ? "" : "חיפוש חופשי"}
           dir="rtl"
-          className="hidden min-w-0 flex-1 bg-transparent text-right font-sans text-[18px] text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block 2xl:text-[24px]"
+          className={`${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
         />
+        {searchActive ? <span className="hidden text-[16px] leading-none text-black lg:block">|</span> : null}
       </label>
 
-      <nav className="flex min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)]" dir="rtl">
+      <nav className={`${mobileSearchOpen ? "hidden" : "flex"} min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)] lg:flex`} dir="rtl">
         <CustomDropdown
           value={sort}
           ariaLabel="Sort confessions"
@@ -387,10 +441,10 @@ function Header({
           optionClassName={dropdownOptionClass}
           renderTrigger={(label) => (
             <>
+              <span>{label}</span>
               <span className="relative h-2 w-1 -rotate-90 lg:h-[11px] lg:w-[6px] 2xl:h-[14.6px] 2xl:w-[8.6px]">
                 <Image src={images.arrow} alt="" fill sizes="15px" />
               </span>
-              <span>{label}</span>
             </>
           )}
         />
@@ -430,18 +484,23 @@ function Header({
 function HeroContent({
   prompt,
   error,
+  isHelpOpen,
   onPromptChange,
   onSubmit,
   onHelp,
 }: {
   prompt: string;
   error?: string;
+  isHelpOpen: boolean;
   onPromptChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onHelp: () => void;
 }) {
+  const [promptFocused, setPromptFocused] = useState(false);
+  const promptActive = promptFocused || prompt.length > 0;
+
   return (
-    <section className="relative z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:mt-[309px] lg:gap-[19px] 2xl:mt-[373px]">
+    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:top-[226px] lg:mt-[309px] lg:gap-[19px] 2xl:top-[290px] 2xl:mt-[373px]">
       <div className="flex w-full flex-col items-center gap-[14px] lg:gap-[19px] 2xl:gap-[28px]">
         <div className="flex flex-col items-center">
           <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
@@ -459,7 +518,11 @@ function HeroContent({
 
       <form
         onSubmit={onSubmit}
-        className="flex w-full max-w-[min(92vw,1046px)] items-center justify-end overflow-hidden rounded-full border-2 border-[blue] bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
+        className={`flex w-full max-w-[min(92vw,1046px)] items-center justify-end overflow-hidden rounded-full border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] transition-colors ${
+          promptActive
+            ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
+            : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
+        }`}
       >
         <span className="flex w-full items-center gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]">
           <button
@@ -467,45 +530,86 @@ function HeroContent({
             onClick={onHelp}
             className="relative size-[24px] shrink-0 lg:size-[34.125px] 2xl:size-[45px]"
             aria-label="Prompt writing instructions"
+            aria-pressed={isHelpOpen}
           >
-            <Image src={images.menuBook} alt="" fill sizes="45px" />
+            <Image
+              src={images.menuBook}
+              alt=""
+              fill
+              sizes="45px"
+              className={isHelpOpen ? "brightness-0" : undefined}
+            />
           </button>
           <input
             value={prompt}
             onChange={(event) => onPromptChange(event.target.value)}
-            placeholder="לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול...."
+            onFocus={() => setPromptFocused(true)}
+            onBlur={() => setPromptFocused(false)}
+            placeholder={promptActive ? "" : "לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול...."}
             dir="rtl"
             className="min-w-0 flex-1 overflow-hidden bg-transparent text-right font-sans text-[14px] text-ellipsis whitespace-nowrap text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
           />
+          {promptActive ? <span className="text-[12px] leading-none text-black lg:text-[19.52px]">|</span> : null}
         </span>
       </form>
       {error ? (
-        <p className="max-w-[290px] text-center text-[14px] leading-snug text-[blue] lg:max-w-none lg:text-[20px] 2xl:text-[24px]">
-          {error}
-        </p>
+        <div className="mt-1 flex max-w-[330px] flex-col items-center gap-1 rounded-[13px] border-2 border-[#fbb03b] bg-[#fff9de] px-5 py-3 text-center shadow-[5px_3px_6.5px_rgba(0,0,0,0.1)] lg:max-w-[466px] lg:px-8 lg:py-4">
+          <strong className="font-haim text-[24px] text-[#fbb03b] lg:text-[34px]">רגע רגע</strong>
+          <span className="text-[14px] leading-[1.2] text-[#2b2b2b] lg:text-[18px] 2xl:text-[20px]">{error}</span>
+        </div>
       ) : null}
     </section>
   );
 }
 
 function SplashIntro({ onDone }: { onDone: () => void }) {
+  const [exiting, setExiting] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const doneRef = useRef(false);
+  const finish = useCallback(() => {
+    if (doneRef.current) {
+      return;
+    }
+
+    doneRef.current = true;
+    setExiting(true);
+    window.setTimeout(onDone, 300);
+  }, [onDone]);
+
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(onDone, reduceMotion ? REDUCED_MOTION_SPLASH_DURATION_MS : SPLASH_INTRO_DURATION_MS);
+    const timer = window.setTimeout(finish, reduceMotion || videoFailed ? REDUCED_MOTION_SPLASH_DURATION_MS : SPLASH_INTRO_DURATION_MS);
 
     return () => window.clearTimeout(timer);
-  }, [onDone]);
+  }, [finish, videoFailed]);
 
   return (
     <div
       aria-hidden="true"
-      className="splash-intro pointer-events-none absolute inset-0 z-25 flex items-center justify-center bg-[#fffaf0] px-[clamp(20px,6vw,72px)]"
+      className={`pointer-events-none absolute inset-0 z-25 flex items-center justify-center bg-[#fffaf0] px-[clamp(20px,6vw,72px)] transition-opacity duration-300 ${
+        exiting ? "opacity-0" : "opacity-100"
+      }`}
     >
-      <div
-        data-figma-name="פתיח אתר 4"
-        data-figma-node-id="1406:579"
-        className="splash-intro-panel aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0]"
-      />
+      {videoFailed ? (
+        <div
+          data-figma-name="פתיח אתר 4"
+          data-figma-node-id="1406:579"
+          className="splash-intro-panel aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0]"
+        />
+      ) : (
+        <video
+          data-figma-name="פתיח אתר 4"
+          data-figma-node-id="1406:579"
+          className="aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0] object-cover"
+          autoPlay
+          muted
+          playsInline
+          onEnded={finish}
+          onError={() => setVideoFailed(true)}
+        >
+          <source src={images.splashIntroVideo} type="video/mp4" />
+        </video>
+      )}
     </div>
   );
 }
@@ -548,6 +652,36 @@ function collageItemsForConfessions(layout: CollageImage[], confessions: Confess
     alt: confession.title,
     confessionId: confession.id,
   }));
+}
+
+function ExtraConfessionsGrid({
+  confessions,
+  onOpenDetail,
+}: {
+  confessions: Confession[];
+  onOpenDetail: (id: string) => void;
+}) {
+  if (confessions.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="relative z-10 mx-auto mt-[min(34dvh,300px)] grid w-[min(92vw,1046px)] grid-cols-2 gap-5 pb-16 pt-8 sm:grid-cols-3 lg:grid-cols-4 2xl:gap-8">
+      {confessions.map((confession) => (
+        <button
+          key={confession.id}
+          type="button"
+          onClick={() => onOpenDetail(confession.id)}
+          className="group flex flex-col items-end gap-2 text-right"
+        >
+          <span className="relative block aspect-square w-full overflow-hidden shadow-[5px_6px_4px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-105">
+            <Image src={confession.image} alt={confession.title} fill sizes="(min-width: 1024px) 240px, 44vw" className="object-cover" />
+          </span>
+          <span className="font-haim text-[20px] text-[blue] lg:text-[26px]">{confession.title}</span>
+        </button>
+      ))}
+    </section>
+  );
 }
 
 function NewConfessionIllustration({ confession }: { confession: Confession }) {
@@ -614,6 +748,52 @@ function TagPill({ children }: { children: ReactNode }) {
   );
 }
 
+function ChutzpahMeter({
+  rating = 0,
+  onRatingChange,
+}: {
+  rating?: number;
+  onRatingChange?: (value: number) => void;
+}) {
+  const [showValue, setShowValue] = useState(false);
+  const value = Math.max(0, Math.min(100, rating));
+
+  return (
+    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-[760px] lg:flex-row lg:items-end lg:gap-[22px] 2xl:w-[1040px]">
+      <p className="shrink-0 text-right text-[14px] font-bold lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
+      <div
+        className="relative h-[63px] w-full max-w-[470px] lg:max-w-none"
+        onPointerEnter={() => setShowValue(true)}
+        onPointerLeave={() => setShowValue(false)}
+      >
+        {showValue ? (
+          <span
+            className="absolute top-0 z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-black shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px]"
+            style={{ left: `calc(${value}% + ${12 - value * 0.24}px)` }}
+          >
+            {value}%
+          </span>
+        ) : null}
+        <div className="absolute left-0 top-[39px] h-5 w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8]">
+          <div className="h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={10}
+          value={value}
+          onPointerDown={() => setShowValue(true)}
+          onPointerUp={() => setShowValue(false)}
+          onChange={(event) => onRatingChange?.(Number(event.target.value))}
+          className="chutzpah-range absolute left-0 top-[33px] h-[29px] w-full"
+          aria-label="Chutzpah meter"
+        />
+      </div>
+    </div>
+  );
+}
+
 function ConfessionCard({
   mode,
   confession,
@@ -646,13 +826,16 @@ function ConfessionCard({
     <div
       className={
         isPreview
-          ? "absolute left-1/2 top-[80px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[22px] lg:top-1/2 lg:w-[1010px] lg:-translate-y-1/2 2xl:w-[1390px]"
-          : "absolute left-1/2 top-[55px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[16px] lg:top-1/2 lg:w-[1010px] lg:-translate-y-1/2 2xl:w-[1390px]"
+          ? "absolute left-1/2 top-[80px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[22px] lg:top-1/2 lg:w-[1013px] lg:-translate-y-1/2 2xl:w-[1390px]"
+          : "absolute left-1/2 top-[55px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[16px] lg:top-1/2 lg:w-[1013px] lg:-translate-y-1/2 2xl:w-[1390px]"
       }
     >
-      <article className="flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:min-h-[500px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:min-h-[720px]">
+      <article
+        className="flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:h-[620px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:h-[720px]"
+        dir="ltr"
+      >
         <div
-          className={`relative h-[364px] w-full overflow-hidden lg:h-auto lg:w-[500px] 2xl:w-[720px] ${isPreview ? "ring-4 ring-[blue]" : ""}`}
+          className={`relative h-[364px] w-full overflow-hidden lg:h-full lg:w-[620px] 2xl:w-[720px] ${isPreview ? "ring-4 ring-[blue]" : ""}`}
         >
           <Image src={image} alt={confession.title} fill priority className="object-cover" sizes="342px" />
           {flashRating !== undefined ? (
@@ -660,14 +843,6 @@ function ConfessionCard({
               {flashRating}%
             </div>
           ) : null}
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-[14px] top-[10px] text-[30px] leading-none text-white"
-            aria-label="Close"
-          >
-            ×
-          </button>
           {isPreview ? (
             <>
               <div className="absolute inset-x-0 bottom-0 h-[76px] bg-linear-to-b from-transparent to-[rgba(0,0,0,0.7)]" />
@@ -694,13 +869,21 @@ function ConfessionCard({
           ) : null}
         </div>
 
-        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:w-[430px] lg:justify-center lg:p-10 2xl:w-[560px] 2xl:p-16">
+        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:h-full lg:w-[393px] lg:justify-start lg:px-[70px] lg:py-[66px] 2xl:w-[670px] 2xl:px-[110px] 2xl:py-[82px]" dir="rtl">
+          <button
+            type="button"
+            onClick={onClose}
+            className="mb-1 self-end text-[30px] leading-none text-[#2b2b2b]"
+            aria-label="Close"
+          >
+            ×
+          </button>
           <div className="flex w-full flex-col items-end gap-[13px]">
             <div className="flex w-full flex-col items-end gap-1.5">
-              {isPreview ? <p className="text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">* תצוגה לפני פרסום</p> : null}
+              {isPreview ? <p className="text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
               <div className="flex w-full flex-col items-end gap-0.5">
-                <h1 className="font-haim text-[26px] leading-none text-[blue] lg:text-[46px] 2xl:text-[64px]">{confession.title}</h1>
-                <p className="text-[14px] text-[#998e8a] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
+                <h1 className="font-haim text-[26px] leading-none text-[blue] lg:text-[36px] 2xl:text-[52px]">{confession.title}</h1>
+                <p className="text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
               </div>
             </div>
             <p className="w-full text-[14px] leading-[1.296] text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">{confession.content}</p>
@@ -711,10 +894,13 @@ function ConfessionCard({
               </p>
             ) : null}
           </div>
-          <div className="flex w-full items-center justify-end gap-2">
-            {confession.tags.map((tag) => (
-              <TagPill key={tag}>{tag}</TagPill>
-            ))}
+          <div className="mt-auto flex w-full flex-col items-end gap-2">
+            <span className="font-bold text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">תגים:</span>
+            <div className="flex w-full flex-wrap items-center justify-end gap-2">
+              {confession.tags.map((tag) => (
+                <TagPill key={tag}>{tag}</TagPill>
+              ))}
+            </div>
           </div>
         </div>
       </article>
@@ -724,38 +910,23 @@ function ConfessionCard({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] 2xl:text-[24px]"
+            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3] 2xl:text-[24px]"
           >
             ביטול
           </button>
           <button
             type="button"
             onClick={() => onPublish?.(image)}
-            className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] 2xl:w-[134px] 2xl:text-[24px]"
+            className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8] 2xl:w-[134px] 2xl:text-[24px]"
+            dir="rtl"
           >
-            פרסום ↑
+            <span className="leading-none">↑</span>
+            <span>פרסום</span>
           </button>
           {actionError ? <p className="max-w-[300px] text-right text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">{actionError}</p> : null}
         </div>
       ) : (
-        <div className="flex w-[296px] flex-col items-end justify-center lg:w-[760px] 2xl:w-[1040px]">
-          <p className="w-full text-right text-[14px] font-bold lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
-          <div className="relative h-[63px] w-full lg:h-[82px]">
-            <span className="absolute left-0 top-1 rounded-[5px] bg-[#fffcf8] px-2 text-[14px] shadow-[1px_1px_4px_0px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:text-[24px]">
-              {rating ?? 0}%
-            </span>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={10}
-              value={rating ?? 0}
-              onChange={(event) => onRatingChange?.(Number(event.target.value))}
-              className="absolute left-0 top-[33px] h-5 w-full accent-[blue] lg:top-[45px]"
-              aria-label="Chutzpah meter"
-            />
-          </div>
-        </div>
+        <ChutzpahMeter rating={rating} onRatingChange={onRatingChange} />
       )}
     </div>
   );
@@ -764,43 +935,47 @@ function ConfessionCard({
 function LoadingImageScreen({ src }: { src: string }) {
   const isCroissants = src === images.loadingCroissants;
   const isSuitcase = src === images.loadingSuitcase;
+  const loadingText = isSuitcase ? "מוסיף את הוידוי שלך" : "מעמיס רגע כמה נתונים";
 
   if (isCroissants) {
     return (
       <ScreenCanvas>
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          data-figma-name="לופ העמסת מזון"
-          data-figma-node-id="1115:31631"
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster={images.loadingCroissantsPoster}
-          preload="auto"
-          aria-hidden="true"
-        >
-          <source src={images.loadingCroissantsVideo} type="video/mp4" />
-        </video>
+        <Backdrop />
+        <div className="absolute left-1/2 top-1/2 z-20 flex w-[min(86vw,596px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-5">
+          <video
+            className="aspect-square w-full object-cover"
+            data-figma-name="לופ העמסת מזון"
+            data-figma-node-id="1115:31631"
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={images.loadingCroissantsPoster}
+            preload="auto"
+            aria-hidden="true"
+          >
+            <source src={images.loadingCroissantsVideo} type="video/mp4" />
+          </video>
+          <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
+            {loadingText}
+            <span className="loading-dots" aria-hidden="true" />
+          </p>
+        </div>
       </ScreenCanvas>
     );
   }
 
   return (
     <ScreenCanvas>
-      <div className="absolute left-1/2 top-0 h-[844px] w-[390px] -translate-x-1/2 lg:hidden">
-        <Image src={src} alt="" fill priority className="object-cover" sizes="390px" />
-      </div>
-      <div className="hidden lg:block">
-        <Backdrop />
-        <div className="absolute left-1/2 top-1/2 z-20 flex h-[596px] w-[680px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-5 bg-[#fffcf8] pb-5 drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] 2xl:h-[903px] 2xl:w-[1392px]">
-          <div className="flex h-[296px] w-[360px] items-center justify-center 2xl:h-[460px] 2xl:w-[620px]">
-            <div className="text-[150px] leading-none 2xl:text-[230px]">{isSuitcase ? "🧳" : "🥐"}</div>
-          </div>
-          <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
-            {isSuitcase ? "מוסיף את הוידוי שלך..." : "מעמיס רגע כמה נתונים"}
-          </p>
+      <Backdrop />
+      <div className="absolute left-1/2 top-1/2 z-20 flex w-[min(86vw,596px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-5 bg-[#fffcf8] p-5 drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)]">
+        <div className="relative aspect-square w-full overflow-hidden bg-[#fffcf8]">
+          <Image src={src} alt="" fill priority className="object-cover" sizes="596px" />
         </div>
+        <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
+          {loadingText}
+          <span className="loading-dots" aria-hidden="true" />
+        </p>
       </div>
     </ScreenCanvas>
   );
@@ -818,19 +993,19 @@ function Modal({
   onCancel: () => void;
 }) {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-[rgba(255,250,240,0.72)] px-6 backdrop-blur-sm">
-      <div className="flex w-[330px] flex-col items-center gap-4 rounded-[18px] border border-[#998e8a] bg-[#fffcf8] p-6 text-center shadow-[6px_6px_20px_rgba(0,0,0,0.18)] lg:w-[466px] 2xl:w-[780px]">
-        <h2 className="font-haim text-[24px] text-[blue] lg:text-[30px] 2xl:text-[52px]">{title}</h2>
-        <div className="text-[14px] leading-[1.45] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]">{children}</div>
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/25 px-6">
+      <div className="flex w-[330px] flex-col items-center gap-[10px] rounded-[13.127px] border-2 border-[#fbb03b] bg-[#fff9de] px-8 py-7 text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)] lg:w-[466px] lg:px-[78px] 2xl:w-[560px]">
+        <h2 className="font-haim text-[40px] leading-none text-[#fbb03b]">{title}</h2>
+        <div className="text-[20px] leading-[0.98] text-[#2b2b2b]">{children}</div>
         <div className="flex gap-3">
-          <button type="button" onClick={onCancel} className="rounded-full border border-[#998e8a] px-5 py-1.5 text-[14px] lg:text-[18px] 2xl:text-[24px]">
-            חזרה
-          </button>
           {onConfirm ? (
-            <button type="button" onClick={onConfirm} className="rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8] lg:text-[18px] 2xl:text-[24px]">
-              אישור
+            <button type="button" onClick={onConfirm} className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3]">
+              למחוק
             </button>
           ) : null}
+          <button type="button" onClick={onCancel} className="rounded-full bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8]">
+            להישאר
+          </button>
         </div>
       </div>
     </div>
@@ -848,22 +1023,48 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   );
 }
 
-function InstructionsCard() {
+function InstructionsContent() {
+  const rows = [
+    ["✓", "תנו ג׳וס- תארו מה עשיתם, איפה? למה? כמה? עם מי? ומה עבר לכם בראש", "text-[#61a605]"],
+    ["✓", "תהיו ספציפיים- ככל שתהיו ספציפיים וכנים יותר התוצאה תהיה מדויקת יותר", "text-[#61a605]"],
+    ["×", "לא להתקמצן במידע... משפט אחד/ כמה מילים לא נחשבות לוידוי", "text-[red]"],
+    ["!", "שגר ושכח! תחשבו טוב טוב לפני שאתם מפרסמים... אין דרך חזרה!", "text-[#fbb03b]"],
+  ];
+
   return (
-    <div className="absolute left-1/2 top-[60%] z-30 flex w-[min(92vw,640px)] -translate-x-1/2 flex-col gap-[12px] rounded-[18px] bg-[#fffcf8] p-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:w-[796px] lg:gap-4 lg:rounded-[24px] lg:p-8 2xl:w-[1046px] 2xl:gap-5 2xl:rounded-[26px]">
-      <h2 className="font-haim text-[22px] text-[blue] lg:text-[30px] 2xl:text-[52px]">איך לכתוב וידוי טוב?</h2>
-      {[
-        ["✓", "ספרו איפה זה קרה ובאיזו מדינה"],
-        ["✓", "תארו מה עשיתם או מה ראיתם בפועל"],
-        ["!", "הוסיפו מי היה מעורב ומה הייתה הסיטואציה"],
-        ["×", "אל תסתפקו במשפט קצר מדי"],
-      ].map(([icon, text]) => (
-        <p key={text} className="flex items-center justify-end gap-3 text-[14px] text-[#2b2b2b] lg:text-[20px] 2xl:text-[30px]">
-          <span>{text}</span>
-          <span className="flex size-6 items-center justify-center rounded-full border border-[blue] text-[blue]">{icon}</span>
-        </p>
-      ))}
-    </div>
+    <>
+      <h2 className="font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
+      <div className="flex flex-col gap-[6px]">
+        {rows.map(([icon, text, color]) => (
+          <p
+            key={text}
+            className="flex items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px]"
+          >
+            <span>{text}</span>
+            <span className={`flex w-[19px] shrink-0 items-center justify-center font-bold ${color}`}>{icon}</span>
+          </p>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function InstructionsCard({ onClose }: { onClose: () => void }) {
+  return (
+    <>
+      <div className="absolute inset-0 z-35 bg-black/25 lg:hidden" />
+      <div className="absolute left-1/2 top-1/2 z-40 flex w-[min(88vw,330px)] -translate-x-1/2 -translate-y-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-7 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:top-[calc(50%+198px)] lg:w-[796px] lg:translate-y-0 lg:gap-[9px] lg:px-[71px] lg:py-5 2xl:top-[calc(50%+242px)]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute left-4 top-3 text-[24px] leading-none text-[#2b2b2b] lg:hidden"
+          aria-label="Close instructions"
+        >
+          ×
+        </button>
+        <InstructionsContent />
+      </div>
+    </>
   );
 }
 
@@ -946,7 +1147,7 @@ function HomeScreen({
       dir="rtl"
     >
       {renderHeader()}
-      <main className="relative min-h-0 w-full flex-1 overflow-hidden" aria-label="Homepage hero">
+      <main className="relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
         <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
           <Collage items={mobileItems} onOpenDetail={onOpenDetail} />
         </div>
@@ -957,14 +1158,16 @@ function HomeScreen({
         <HeroContent
           prompt={prompt}
           error={error}
+          isHelpOpen={Boolean(showInstructions)}
           onPromptChange={onPromptChange}
           onSubmit={onSubmit}
           onHelp={onHelp}
         />
         {showSplashIntro ? <SplashIntro onDone={onSplashIntroDone} /> : null}
-        {showInstructions ? <InstructionsCard /> : null}
+        {showInstructions ? <InstructionsCard onClose={onHelp} /> : null}
         {showSuccess ? <SuccessToast onDismiss={onDismissSuccess} /> : null}
         {hasNoResults ? <EmptyState onReset={onResetFilters} /> : null}
+        <ExtraConfessionsGrid confessions={visibleConfessions.slice(8)} onOpenDetail={onOpenDetail} />
       </main>
     </div>
   );
@@ -1243,8 +1446,8 @@ export default function Home() {
           }}
         />
         {showCancelConfirm ? (
-          <Modal title="לבטל את הוידוי?" onCancel={() => setShowCancelConfirm(false)} onConfirm={() => void handleCancelDraft()}>
-            הביטול ימחק את הטיוטה ויחזיר אותך למסך הבית.
+          <Modal title="בדוק?" onCancel={() => setShowCancelConfirm(false)} onConfirm={() => void handleCancelDraft()}>
+            פעולה זו תוביל למחיקת הוידוי שלך לנצח נצחים (בלי לחץ)
           </Modal>
         ) : null}
       </ScreenCanvas>

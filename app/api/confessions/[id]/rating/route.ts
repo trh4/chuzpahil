@@ -47,6 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           AND confessions.status = 'published'
         RETURNING
           id,
+          confessions.seed_key,
           title,
           content,
           country,

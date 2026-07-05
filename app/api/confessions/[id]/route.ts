@@ -9,6 +9,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const rows = await sql`
       SELECT
         id,
+        seed_key,
         title,
         content,
         country,

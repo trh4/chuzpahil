@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
     const query = `
       SELECT
         id,
+        seed_key,
         title,
         content,
         country,
