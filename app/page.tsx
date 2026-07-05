@@ -58,6 +58,15 @@ type CollageImage = {
   priority?: boolean;
 };
 
+const extraCollagePositions = [
+  { className: "left-[4%] top-[8%] w-[42vw] lg:left-[10%] lg:w-[19vw]", rotate: "-rotate-[13deg]" },
+  { className: "left-[54%] top-[2%] w-[49vw] lg:left-[42%] lg:w-[17vw]", rotate: "rotate-[10deg]" },
+  { className: "left-[23%] top-[28%] w-[38vw] lg:left-[67%] lg:top-[10%] lg:w-[21vw]", rotate: "rotate-[19deg]" },
+  { className: "left-[-10%] top-[48%] w-[54vw] lg:left-[22%] lg:top-[45%] lg:w-[23vw]", rotate: "rotate-[8deg]" },
+  { className: "left-[48%] top-[58%] w-[45vw] lg:left-[54%] lg:top-[42%] lg:w-[18vw]", rotate: "-rotate-[17deg]" },
+  { className: "left-[16%] top-[78%] w-[46vw] lg:left-[78%] lg:top-[61%] lg:w-[16vw]", rotate: "rotate-[14deg]" },
+];
+
 // Positions are percentages of the page, sizes are relative to the viewport
 // width, so the collage scales continuously with any screen size.
 // Mobile layout matches Figma frame 1334:719 (390x844).
@@ -193,9 +202,11 @@ function FloatingIllustration({
   style,
   priority,
   faded,
+  shrunk,
   onClick,
 }: CollageImage & {
   faded?: boolean;
+  shrunk?: boolean;
   onClick?: () => void;
 }) {
   const content = (
@@ -215,7 +226,9 @@ function FloatingIllustration({
 
   return (
     <div
-      className={`absolute flex aspect-square items-center justify-center transition-transform duration-300 ease-out hover:z-20 hover:scale-110 ${className}`}
+      className={`absolute flex aspect-square items-center justify-center transition-transform duration-500 ease-out hover:z-20 hover:scale-110 ${
+        shrunk ? "scale-[0.86]" : ""
+      } ${className}`}
       style={style}
     >
       {onClick ? (
@@ -296,7 +309,7 @@ function CustomDropdown<Value extends string>({
         {renderTrigger ? renderTrigger(selectedLabel, open) : selectedLabel}
       </button>
       {open ? (
-        <div role="listbox" aria-label={ariaLabel} className={panelClassName}>
+        <div role="listbox" aria-label={ariaLabel} className={panelClassName} dir="rtl">
           {options.map((option) => (
             <button
               key={option.value}
@@ -427,7 +440,6 @@ function Header({
           dir="rtl"
           className={`${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
         />
-        {searchActive ? <span className="hidden text-[16px] leading-none text-black lg:block">|</span> : null}
       </label>
 
       <nav className={`${mobileSearchOpen ? "hidden" : "flex"} min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)] lg:flex`} dir="rtl">
@@ -436,7 +448,7 @@ function Header({
           ariaLabel="Sort confessions"
           options={sortOptions}
           onChange={onSortChange}
-          triggerClassName="flex shrink-0 items-center justify-center gap-1 bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:gap-[6px] lg:text-[16px] 2xl:text-[24px]"
+          triggerClassName="flex shrink-0 items-center justify-center gap-1 bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:gap-[6px] lg:text-[16px] 2xl:gap-2 2xl:text-[24px]"
           panelClassName={dropdownPanelClass}
           optionClassName={dropdownOptionClass}
           renderTrigger={(label) => (
@@ -518,27 +530,32 @@ function HeroContent({
 
       <form
         onSubmit={onSubmit}
+        id="hero-prompt-form"
         className={`flex w-full max-w-[min(92vw,1046px)] items-center justify-end overflow-hidden rounded-full border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] transition-colors ${
           promptActive
             ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
             : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
         }`}
       >
-        <span className="flex w-full items-center gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]">
+        <span className="flex w-full items-center justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
           <button
             type="button"
             onClick={onHelp}
-            className="relative size-[24px] shrink-0 lg:size-[34.125px] 2xl:size-[45px]"
+            className={`relative flex size-[30px] shrink-0 items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
+              isHelpOpen ? "bg-[#d1e2ff]" : ""
+            }`}
             aria-label="Prompt writing instructions"
             aria-pressed={isHelpOpen}
           >
-            <Image
-              src={images.menuBook}
-              alt=""
-              fill
-              sizes="45px"
-              className={isHelpOpen ? "brightness-0" : undefined}
-            />
+            <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
+              <Image
+                src={images.menuBook}
+                alt=""
+                fill
+                sizes="45px"
+                className={isHelpOpen ? "brightness-0" : undefined}
+              />
+            </span>
           </button>
           <input
             value={prompt}
@@ -549,12 +566,12 @@ function HeroContent({
             dir="rtl"
             className="min-w-0 flex-1 overflow-hidden bg-transparent text-right font-sans text-[14px] text-ellipsis whitespace-nowrap text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
           />
-          {promptActive ? <span className="text-[12px] leading-none text-black lg:text-[19.52px]">|</span> : null}
         </span>
       </form>
+      {isHelpOpen ? <InstructionsCard onClose={onHelp} /> : null}
       {error ? (
-        <div className="mt-1 flex max-w-[330px] flex-col items-center gap-1 rounded-[13px] border-2 border-[#fbb03b] bg-[#fff9de] px-5 py-3 text-center shadow-[5px_3px_6.5px_rgba(0,0,0,0.1)] lg:max-w-[466px] lg:px-8 lg:py-4">
-          <strong className="font-haim text-[24px] text-[#fbb03b] lg:text-[34px]">רגע רגע</strong>
+        <div className="fixed left-1/2 top-1/2 z-50 flex w-[min(86vw,348px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#a90e25] bg-[#ffe4d7] px-8 py-[27.566px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)]">
+          <strong className="font-haim text-[40px] leading-none text-[#a90e25]">לא משהו...</strong>
           <span className="text-[14px] leading-[1.2] text-[#2b2b2b] lg:text-[18px] 2xl:text-[20px]">{error}</span>
         </div>
       ) : null}
@@ -617,19 +634,22 @@ function SplashIntro({ onDone }: { onDone: () => void }) {
 function Collage({
   items,
   faded = false,
+  shrinkIndex,
   onOpenDetail,
 }: {
   items: CollageImage[];
   faded?: boolean;
+  shrinkIndex?: number;
   onOpenDetail?: (id: string) => void;
 }) {
   return (
     <>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <FloatingIllustration
           key={`${item.src}-${item.className}`}
           {...item}
           faded={faded}
+          shrunk={index === shrinkIndex}
           onClick={
             onOpenDetail
               ? () => {
@@ -666,27 +686,29 @@ function ExtraConfessionsGrid({
   }
 
   return (
-    <section className="relative z-10 mx-auto mt-[min(34dvh,300px)] grid w-[min(92vw,1046px)] grid-cols-2 gap-5 pb-16 pt-8 sm:grid-cols-3 lg:grid-cols-4 2xl:gap-8">
-      {confessions.map((confession) => (
-        <button
-          key={confession.id}
-          type="button"
-          onClick={() => onOpenDetail(confession.id)}
-          className="group flex flex-col items-end gap-2 text-right"
-        >
-          <span className="relative block aspect-square w-full overflow-hidden shadow-[5px_6px_4px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-105">
-            <Image src={confession.image} alt={confession.title} fill sizes="(min-width: 1024px) 240px, 44vw" className="object-cover" />
-          </span>
-          <span className="font-haim text-[20px] text-[blue] lg:text-[26px]">{confession.title}</span>
-        </button>
-      ))}
+    <section className="relative z-10 mx-auto mt-[min(34dvh,300px)] h-[calc(120vw+160px)] min-h-[720px] w-full pb-20 lg:h-[820px] 2xl:h-[980px]">
+      {confessions.map((confession, index) => {
+        const position = extraCollagePositions[index % extraCollagePositions.length];
+
+        return (
+          <FloatingIllustration
+            key={confession.id}
+            src={confession.image}
+            alt={confession.title}
+            confessionId={confession.id}
+            className={position.className}
+            rotate={position.rotate}
+            onClick={() => onOpenDetail(confession.id)}
+          />
+        );
+      })}
     </section>
   );
 }
 
 function NewConfessionIllustration({ confession }: { confession: Confession }) {
   return (
-    <div className="absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_500ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
+    <div className="absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_1000ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
       <div className="relative aspect-square w-[81%] rotate-[-15.76deg] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)]">
         <Image src={confession.image} alt={confession.title} fill className="object-cover" sizes="(min-width: 1024px) 25vw, 64vw" />
       </div>
@@ -734,7 +756,7 @@ function Backdrop({ onClick }: { onClick?: () => void }) {
 
 function ScreenCanvas({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-dvh w-full flex-1 overflow-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
+    <div className="relative min-h-dvh w-full flex-1 overflow-y-auto overflow-x-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
       {children}
     </div>
   );
@@ -751,25 +773,29 @@ function TagPill({ children }: { children: ReactNode }) {
 function ChutzpahMeter({
   rating = 0,
   onRatingChange,
+  onRatingCommit,
 }: {
   rating?: number;
   onRatingChange?: (value: number) => void;
+  onRatingCommit?: (value: number) => void;
 }) {
-  const [showValue, setShowValue] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const value = Math.max(0, Math.min(100, rating));
+  const showValue = hovering || dragging;
 
   return (
     <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-[760px] lg:flex-row lg:items-end lg:gap-[22px] 2xl:w-[1040px]">
       <p className="shrink-0 text-right text-[14px] font-bold lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
       <div
         className="relative h-[63px] w-full max-w-[470px] lg:max-w-none"
-        onPointerEnter={() => setShowValue(true)}
-        onPointerLeave={() => setShowValue(false)}
+        onPointerEnter={() => setHovering(true)}
+        onPointerLeave={() => setHovering(false)}
       >
         {showValue ? (
           <span
             className="absolute top-0 z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-black shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px]"
-            style={{ left: `calc(${value}% + ${12 - value * 0.24}px)` }}
+            style={{ left: `calc(${value}% + ${14.5 - value * 0.29}px)` }}
           >
             {value}%
           </span>
@@ -783,8 +809,11 @@ function ChutzpahMeter({
           max={100}
           step={10}
           value={value}
-          onPointerDown={() => setShowValue(true)}
-          onPointerUp={() => setShowValue(false)}
+          onPointerDown={() => setDragging(true)}
+          onPointerUp={(event) => {
+            setDragging(false);
+            onRatingCommit?.(Number(event.currentTarget.value));
+          }}
           onChange={(event) => onRatingChange?.(Number(event.target.value))}
           className="chutzpah-range absolute left-0 top-[33px] h-[29px] w-full"
           aria-label="Chutzpah meter"
@@ -802,6 +831,7 @@ function ConfessionCard({
   actionError,
   flashRating,
   onRatingChange,
+  onRatingCommit,
   onClose,
   onCancel,
   onPublish,
@@ -813,21 +843,24 @@ function ConfessionCard({
   actionError?: string;
   flashRating?: number;
   onRatingChange?: (value: number) => void;
+  onRatingCommit?: (value: number) => void;
   onClose?: () => void;
   onCancel?: () => void;
   onPublish?: (selectedImageUrl: string) => void;
 }) {
   const isPreview = mode === "preview";
   const [previewImageIndex, setPreviewImageIndex] = useState(0);
+  const [selectedPreviewImageIndex, setSelectedPreviewImageIndex] = useState<number>();
   const previewImages = imageOptions?.length ? imageOptions : [confession.image];
   const image = isPreview ? previewImages[previewImageIndex] : confession.image;
+  const selectedImage = isPreview ? previewImages[selectedPreviewImageIndex ?? previewImageIndex] : image;
 
   return (
     <div
       className={
         isPreview
-          ? "absolute left-1/2 top-[80px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[22px] lg:top-1/2 lg:w-[1013px] lg:-translate-y-1/2 2xl:w-[1390px]"
-          : "absolute left-1/2 top-[55px] z-20 flex w-[342px] -translate-x-1/2 flex-col items-center gap-[16px] lg:top-1/2 lg:w-[1013px] lg:-translate-y-1/2 2xl:w-[1390px]"
+          ? "relative z-20 mx-auto mt-[80px] flex w-[342px] flex-col items-center gap-[22px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
+          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
       }
     >
       <article
@@ -835,45 +868,72 @@ function ConfessionCard({
         dir="ltr"
       >
         <div
-          className={`relative h-[364px] w-full overflow-hidden lg:h-full lg:w-[620px] 2xl:w-[720px] ${isPreview ? "ring-4 ring-[blue]" : ""}`}
+          className={`relative h-[364px] w-full overflow-hidden lg:h-full lg:basis-[61.2%] 2xl:basis-[58.1%] ${
+            isPreview && selectedPreviewImageIndex === previewImageIndex ? "ring-4 ring-[blue]" : ""
+          }`}
         >
           <Image src={image} alt={confession.title} fill priority className="object-cover" sizes="342px" />
+          {isPreview ? (
+            <button
+              type="button"
+              onClick={() => setSelectedPreviewImageIndex(previewImageIndex)}
+              className="absolute inset-0 z-10 cursor-pointer"
+              aria-label="Select this preview image"
+            />
+          ) : null}
           {flashRating !== undefined ? (
-            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 px-6 py-3 text-[34px] font-bold text-[blue] shadow-[3px_3px_18px_rgba(0,0,0,0.25)] 2xl:text-[52px]">
+            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-[6.837px] bg-[#fffcf8] px-[30px] py-[13px] text-[27px] font-bold text-[#2b2b2b] shadow-[3px_3px_18px_rgba(0,0,0,0.18)]">
               {flashRating}%
             </div>
+          ) : null}
+          {!isPreview ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-[14px] top-[10px] z-20 flex size-[42px] items-center justify-center text-[32px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
+              aria-label="Close"
+            >
+              ×
+            </button>
           ) : null}
           {isPreview ? (
             <>
               <div className="absolute inset-x-0 bottom-0 h-[76px] bg-linear-to-b from-transparent to-[rgba(0,0,0,0.7)]" />
-              <div className="absolute bottom-[17px] left-1/2 flex -translate-x-1/2 items-center gap-[108px] text-[34px] leading-none text-white">
+              <div className="absolute bottom-[17px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-[108px] text-[34px] leading-none text-white lg:gap-[218.63px]">
                 <button
                   type="button"
                   onClick={() => setPreviewImageIndex((value) => (value + previewImages.length - 1) % previewImages.length)}
                   aria-label="Previous preview image"
+                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
                 >
-                  →
+                  ←
                 </button>
-                <span className="text-[24px]">
-                  {previewImageIndex + 1}/{previewImages.length}
+                <span className="flex items-center gap-1">
+                  {previewImages.map((option, index) => (
+                    <span
+                      key={`${option}-${index}`}
+                      className={`block rounded-full ${index === previewImageIndex ? "size-[14px] bg-white" : "size-[9px] bg-white/55"}`}
+                    />
+                  ))}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPreviewImageIndex((value) => (value + 1) % previewImages.length)}
                   aria-label="Next preview image"
+                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
                 >
-                  ←
+                  →
                 </button>
               </div>
             </>
           ) : null}
         </div>
 
-        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:h-full lg:w-[393px] lg:justify-start lg:px-[70px] lg:py-[66px] 2xl:w-[670px] 2xl:px-[110px] 2xl:py-[82px]" dir="rtl">
+        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:h-full lg:basis-[38.8%] lg:justify-start lg:px-[70px] lg:py-[20px] 2xl:basis-[41.9%] 2xl:px-[86px] 2xl:py-[40px]" dir="rtl">
           <button
             type="button"
             onClick={onClose}
-            className="mb-1 self-end text-[30px] leading-none text-[#2b2b2b]"
+            className="mb-1 hidden size-[63px] items-center justify-center self-end text-[60px] leading-none text-[#2b2b2b] lg:flex"
             aria-label="Close"
           >
             ×
@@ -895,7 +955,7 @@ function ConfessionCard({
             ) : null}
           </div>
           <div className="mt-auto flex w-full flex-col items-end gap-2">
-            <span className="font-bold text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">תגים:</span>
+            <span className="hidden font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
             <div className="flex w-full flex-wrap items-center justify-end gap-2">
               {confession.tags.map((tag) => (
                 <TagPill key={tag}>{tag}</TagPill>
@@ -909,24 +969,24 @@ function ConfessionCard({
         <div className="flex items-center gap-[10px] lg:mt-1">
           <button
             type="button"
-            onClick={onCancel}
-            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3] 2xl:text-[24px]"
-          >
-            ביטול
-          </button>
-          <button
-            type="button"
-            onClick={() => onPublish?.(image)}
+            onClick={() => onPublish?.(selectedImage)}
             className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8] 2xl:w-[134px] 2xl:text-[24px]"
             dir="rtl"
           >
             <span className="leading-none">↑</span>
             <span>פרסום</span>
           </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3] 2xl:text-[24px]"
+          >
+            ביטול
+          </button>
           {actionError ? <p className="max-w-[300px] text-right text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">{actionError}</p> : null}
         </div>
       ) : (
-        <ChutzpahMeter rating={rating} onRatingChange={onRatingChange} />
+        <ChutzpahMeter rating={rating} onRatingChange={onRatingChange} onRatingCommit={onRatingCommit} />
       )}
     </div>
   );
@@ -941,9 +1001,9 @@ function LoadingImageScreen({ src }: { src: string }) {
     return (
       <ScreenCanvas>
         <Backdrop />
-        <div className="absolute left-1/2 top-1/2 z-20 flex w-[min(86vw,596px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-5">
+        <div className="absolute left-1/2 top-1/2 z-20 flex h-[67dvh] w-[min(92vw,67vw)] min-w-[342px] max-w-[895px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] bg-[#fefdf8] px-[clamp(24px,8vw,211px)] pb-[42px] pt-[35px] drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)]">
           <video
-            className="aspect-square w-full object-cover"
+            className="min-h-0 w-full flex-1 object-contain"
             data-figma-name="לופ העמסת מזון"
             data-figma-node-id="1115:31631"
             autoPlay
@@ -968,8 +1028,8 @@ function LoadingImageScreen({ src }: { src: string }) {
   return (
     <ScreenCanvas>
       <Backdrop />
-      <div className="absolute left-1/2 top-1/2 z-20 flex w-[min(86vw,596px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-5 bg-[#fffcf8] p-5 drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)]">
-        <div className="relative aspect-square w-full overflow-hidden bg-[#fffcf8]">
+      <div className="absolute left-1/2 top-1/2 z-20 flex h-[67dvh] w-[min(92vw,67vw)] min-w-[342px] max-w-[895px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] bg-[#fefdf8] px-[clamp(24px,8vw,211px)] pb-[42px] pt-[35px] drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)]">
+        <div className="relative min-h-0 w-full flex-1 overflow-hidden bg-[#fffcf8]">
           <Image src={src} alt="" fill priority className="object-cover" sizes="596px" />
         </div>
         <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
@@ -1039,8 +1099,9 @@ function InstructionsContent() {
           <p
             key={text}
             className="flex items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px]"
+            dir="ltr"
           >
-            <span>{text}</span>
+            <span dir="rtl">{text}</span>
             <span className={`flex w-[19px] shrink-0 items-center justify-center font-bold ${color}`}>{icon}</span>
           </p>
         ))}
@@ -1051,20 +1112,20 @@ function InstructionsContent() {
 
 function InstructionsCard({ onClose }: { onClose: () => void }) {
   return (
-    <>
-      <div className="absolute inset-0 z-35 bg-black/25 lg:hidden" />
-      <div className="absolute left-1/2 top-1/2 z-40 flex w-[min(88vw,330px)] -translate-x-1/2 -translate-y-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-7 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:top-[calc(50%+198px)] lg:w-[796px] lg:translate-y-0 lg:gap-[9px] lg:px-[71px] lg:py-5 2xl:top-[calc(50%+242px)]">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute left-4 top-3 text-[24px] leading-none text-[#2b2b2b] lg:hidden"
-          aria-label="Close instructions"
-        >
-          ×
-        </button>
-        <InstructionsContent />
-      </div>
-    </>
+    <div
+      className="relative z-40 mt-[10px] flex w-full max-w-[min(92vw,1046px)] flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:px-[71px]"
+      dir="rtl"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute left-4 top-3 text-[24px] leading-none text-[#2b2b2b] lg:hidden"
+        aria-label="Close instructions"
+      >
+        ×
+      </button>
+      <InstructionsContent />
+    </div>
   );
 }
 
@@ -1121,8 +1182,11 @@ function HomeScreen({
   onSortChange: (value: SortValue) => void;
   onResetFilters: () => void;
 }) {
-  const mobileItems = collageItemsForConfessions(mobileCollage, visibleConfessions);
-  const desktopItems = collageItemsForConfessions(desktopCollage, visibleConfessions);
+  const collageConfessions = newConfession
+    ? visibleConfessions.filter((confession) => confession.id !== newConfession.id)
+    : visibleConfessions;
+  const mobileItems = collageItemsForConfessions(mobileCollage, collageConfessions);
+  const desktopItems = collageItemsForConfessions(desktopCollage, collageConfessions);
 
   function renderHeader() {
     return (
@@ -1149,10 +1213,10 @@ function HomeScreen({
       {renderHeader()}
       <main className="relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
         <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
-          <Collage items={mobileItems} onOpenDetail={onOpenDetail} />
+          <Collage items={mobileItems} shrinkIndex={newConfession ? 4 : undefined} onOpenDetail={onOpenDetail} />
         </div>
         <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden lg:block">
-          <Collage items={desktopItems} onOpenDetail={onOpenDetail} />
+          <Collage items={desktopItems} shrinkIndex={newConfession ? 6 : undefined} onOpenDetail={onOpenDetail} />
         </div>
         {newConfession ? <NewConfessionIllustration confession={newConfession} /> : null}
         <HeroContent
@@ -1164,10 +1228,9 @@ function HomeScreen({
           onHelp={onHelp}
         />
         {showSplashIntro ? <SplashIntro onDone={onSplashIntroDone} /> : null}
-        {showInstructions ? <InstructionsCard onClose={onHelp} /> : null}
         {showSuccess ? <SuccessToast onDismiss={onDismissSuccess} /> : null}
         {hasNoResults ? <EmptyState onReset={onResetFilters} /> : null}
-        <ExtraConfessionsGrid confessions={visibleConfessions.slice(8)} onOpenDetail={onOpenDetail} />
+        <ExtraConfessionsGrid confessions={collageConfessions.slice(8)} onOpenDetail={onOpenDetail} />
       </main>
     </div>
   );
@@ -1377,8 +1440,6 @@ export default function Home() {
     }
 
     setRating(value);
-    setFlashRating(value);
-    window.setTimeout(() => setFlashRating(undefined), 1200);
 
     const response = await fetch(`/api/confessions/${selectedConfession.id}/rating`, {
       method: "POST",
@@ -1393,6 +1454,11 @@ export default function Home() {
 
     const body = (await response.json()) as { confession: Confession };
     setConfessions((items) => items.map((item) => (item.id === body.confession.id ? body.confession : item)));
+  }
+
+  function handleRatingCommit(value: number) {
+    setFlashRating(value);
+    window.setTimeout(() => setFlashRating(undefined), 1200);
   }
 
   function resetFilters() {
@@ -1424,6 +1490,7 @@ export default function Home() {
           onRatingChange={(value) => {
             void handleRatingChange(value);
           }}
+          onRatingCommit={handleRatingCommit}
           onClose={closeDetail}
         />
       </ScreenCanvas>

@@ -115,7 +115,6 @@ function hasEnoughConcreteDetails(prompt: string) {
 
 function fallbackConfession(prompt: string): GeneratedConfession {
   const country = inferCountry(prompt);
-  const location = country === "אחר" ? "בחו״ל" : `ב${country}`;
   const isAnimalStory = /פיל|פילים|חיה|חיות|קוף|כלב|חתול/.test(prompt);
   const hasAggression = /הרבצ|ירק|בעט|דחפ|מכה|הכיתי/.test(prompt);
   const topic = isAnimalStory || hasAggression ? "התנהגות לא ראויה" : "חוויות טיול";
@@ -126,7 +125,7 @@ function fallbackConfession(prompt: string): GeneratedConfession {
 
   return {
     title,
-    content: `במהלך טיול ${location}, קרה רגע שאני ממש לא גאה בו: ${prompt}. באותו רגע זה אולי נראה לי מצחיק או קטן, אבל בדיעבד זו הייתה חוצפה מכוערת ולא מכבדת. זה מסוג הסיפורים שמספרים רק כדי להודות בטעות, לא כדי להתגאות בה.`,
+    content: prompt,
     country,
     topic,
     tags: tags.slice(0, 3),
@@ -154,7 +153,8 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
             "Treat short but concrete prompts as valid. If the prompt includes an action and a location, country, nationality, or travel clue, infer the missing details and expand it into a coherent confession.",
             "Only reject prompts that are empty, gibberish, too vague to identify an event, or clearly not a confession.",
             "For invalid prompts, return a specific Hebrew user-facing error, for example: {\"valid\":false,\"error\":\"הוסיפו מה קרה בפועל, איפה זה קרה ולמה זו חוצפה.\"}. Never return the literal placeholder text \"Hebrew error\".",
-            "For valid prompts, return {\"valid\":true,\"title\":\"כותרת בעברית\",\"content\":\"טקסט וידוי בעברית, 2-4 משפטים\",\"country\":\"מדינה/מיקום בעברית\",\"topic\":\"קטגוריה בעברית\",\"tags\":[\"עד 3 תגיות בעברית\"]}.",
+            "For valid prompts, return {\"valid\":true,\"title\":\"כותרת בעברית\",\"content\":\"הטקסט המקורי של המשתמש ללא שינוי\",\"country\":\"מדינה/מיקום בעברית\",\"topic\":\"קטגוריה בעברית\",\"tags\":[\"עד 3 תגיות בעברית\"]}.",
+            "Do not rewrite, expand, summarize, correct, or add to the user's confession paragraph. The content field must preserve the user's original prompt exactly.",
             "Keep the tone funny, light, sarcastic, and non-graphic. If the prompt describes rude or aggressive behavior, frame it as an embarrassing/regretful travel confession and do not glorify harm.",
           ].join(" "),
       },
@@ -183,7 +183,7 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
 
   return {
     title: parsed.title?.trim() || "וידוי חדש",
-    content: parsed.content?.trim() || trimmedPrompt,
+    content: trimmedPrompt,
     country: parsed.country?.trim() || "אחר",
     topic: parsed.topic?.trim() || "אחר",
     tags: normalizeTags(parsed.tags),
