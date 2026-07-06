@@ -39,6 +39,8 @@ const images = {
   passport: imagePaths.passport,
   search: "/images/search-icon.svg",
   searchMobile: "/images/search-icon-mobile.svg",
+  searchMobileBlue: "/images/search-icon-mobile-blue.svg",
+  sendArrow: "/images/send-arrow.svg",
   splashIntroVideo: "/videos/splash-intro.mp4",
   tour: imagePaths.tour,
   waterpark: imagePaths.waterpark,
@@ -58,13 +60,15 @@ type CollageImage = {
   priority?: boolean;
 };
 
+// Scattered scroll confessions live only in the far-left and far-right thirds so
+// they never cover the centered logo/title/prompt.
 const extraCollagePositions = [
-  { className: "left-[4%] top-[8%] w-[42vw] lg:left-[10%] lg:w-[19vw]", rotate: "-rotate-[13deg]" },
-  { className: "left-[54%] top-[2%] w-[49vw] lg:left-[42%] lg:w-[17vw]", rotate: "rotate-[10deg]" },
-  { className: "left-[23%] top-[28%] w-[38vw] lg:left-[67%] lg:top-[10%] lg:w-[21vw]", rotate: "rotate-[19deg]" },
-  { className: "left-[-10%] top-[48%] w-[54vw] lg:left-[22%] lg:top-[45%] lg:w-[23vw]", rotate: "rotate-[8deg]" },
-  { className: "left-[48%] top-[58%] w-[45vw] lg:left-[54%] lg:top-[42%] lg:w-[18vw]", rotate: "-rotate-[17deg]" },
-  { className: "left-[16%] top-[78%] w-[46vw] lg:left-[78%] lg:top-[61%] lg:w-[16vw]", rotate: "rotate-[14deg]" },
+  { className: "left-[2%] top-[8%] w-[42vw] lg:left-[7%] lg:w-[19vw]", rotate: "-rotate-[13deg]" },
+  { className: "left-[62%] top-[2%] w-[46vw] lg:left-[75%] lg:w-[17vw]", rotate: "rotate-[10deg]" },
+  { className: "left-[-8%] top-[28%] w-[38vw] lg:left-[68%] lg:top-[10%] lg:w-[21vw]", rotate: "rotate-[19deg]" },
+  { className: "left-[64%] top-[48%] w-[44vw] lg:left-[5%] lg:top-[45%] lg:w-[23vw]", rotate: "rotate-[8deg]" },
+  { className: "left-[1%] top-[58%] w-[45vw] lg:left-[73%] lg:top-[42%] lg:w-[18vw]", rotate: "-rotate-[17deg]" },
+  { className: "left-[63%] top-[78%] w-[42vw] lg:left-[81%] lg:top-[61%] lg:w-[16vw]", rotate: "rotate-[14deg]" },
 ];
 
 // Positions are percentages of the page, sizes are relative to the viewport
@@ -112,7 +116,7 @@ const mobileCollage: CollageImage[] = [
     src: images.beach,
     alt: "Illustration of tourists on a beach",
     confessionId: "honeymoon",
-    className: "left-[53.6%] top-[56.2%] w-[91.4vw]",
+    className: "left-[60%] top-[56.2%] w-[91.4vw]",
     rotate: "rotate-[13.47deg]",
   },
   {
@@ -126,7 +130,7 @@ const mobileCollage: CollageImage[] = [
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[46.4%] top-[84.1%] w-[44.4vw]",
+    className: "left-[2%] top-[84.1%] w-[44.4vw]",
     rotate: "-rotate-[20.55deg]",
   },
 ];
@@ -146,7 +150,7 @@ const desktopCollage: CollageImage[] = [
     src: images.flipflops,
     alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[51.3%] top-[5.2%] w-[21.8vw] 2xl:left-[56.9%] 2xl:top-[10.1%] 2xl:w-[17.4vw]",
+    className: "left-[63%] top-[5.2%] w-[21.8vw] 2xl:left-[65%] 2xl:top-[10.1%] 2xl:w-[17.4vw]",
     rotate: "rotate-[25.36deg]",
   },
   {
@@ -189,7 +193,7 @@ const desktopCollage: CollageImage[] = [
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[47.2%] top-[74.3%] w-[22.2vw] 2xl:left-[52.3%] 2xl:top-[76.9%] 2xl:w-[20.9vw]",
+    className: "left-[60%] top-[74.3%] w-[22.2vw] 2xl:left-[62%] 2xl:top-[76.9%] 2xl:w-[20.9vw]",
     rotate: "rotate-[8.85deg]",
   },
 ];
@@ -203,10 +207,12 @@ function FloatingIllustration({
   priority,
   faded,
   shrunk,
+  spin = 0,
   onClick,
 }: CollageImage & {
   faded?: boolean;
   shrunk?: boolean;
+  spin?: number;
   onClick?: () => void;
 }) {
   const content = (
@@ -231,15 +237,27 @@ function FloatingIllustration({
       } ${className}`}
       style={style}
     >
-      {onClick ? (
-        <button type="button" onClick={onClick} className="flex size-full cursor-pointer items-center justify-center">
-          {content}
-        </button>
-      ) : (
-        content
-      )}
+      <div
+        className="flex size-full items-center justify-center transition-transform duration-300 ease-out will-change-transform"
+        style={{ transform: `rotate(${spin}deg)` }}
+      >
+        {onClick ? (
+          <button type="button" onClick={onClick} className="flex size-full cursor-pointer items-center justify-center">
+            {content}
+          </button>
+        ) : (
+          content
+        )}
+      </div>
     </div>
   );
+}
+
+/** Deterministic per-slot spin so scroll rotation direction/strength is stable across renders. */
+function spinForIndex(index: number, scrollProgress: number) {
+  const direction = index % 2 === 0 ? 1 : -1;
+  const magnitude = 0.6 + (((index * 7) % 5) / 5) * 0.4;
+  return scrollProgress * 30 * direction * magnitude;
 }
 
 type DropdownOption<Value extends string> = {
@@ -390,57 +408,75 @@ function Header({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const closeMobileSearch = () => {
+    setMobileSearchOpen(false);
+    setSearchFocused(false);
+    onSearchChange("");
+  };
+
   return (
     <header
       className="relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-visible border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
       dir="ltr"
     >
-      <label
-        className={`flex min-w-0 items-center rounded-full transition-colors ${
-          mobileSearchOpen
-            ? "w-[min(72vw,290px)] justify-between border border-[blue] px-[10px] py-[4px]"
-            : "justify-center p-[6px]"
-        } lg:w-[clamp(290px,29.5vw,567px)] lg:justify-between lg:border lg:px-[clamp(15px,1.2vw,22px)] lg:py-[clamp(6px,0.55vw,10px)] ${
-          searchActive ? "lg:border-[blue]" : "lg:border-[#998e8a]"
-        }`}
-        onClick={() => {
-          if (!mobileSearchOpen) {
-            setMobileSearchOpen(true);
-          }
-        }}
-      >
-        <span className="relative h-[12px] w-[10px] shrink-0 lg:h-[clamp(18px,1.15vw,22px)] lg:w-[clamp(15px,1vw,19px)]">
-          <Image
-            src={images.searchMobile}
-            alt=""
-            fill
-            className="object-contain lg:hidden"
-            sizes="10px"
-          />
-          <Image
-            src={images.search}
-            alt=""
-            fill
-            className="hidden object-contain lg:block"
-            sizes="19px"
-          />
-        </span>
-        <input
-          ref={searchInputRef}
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => {
-            setSearchFocused(false);
-            if (!search.trim()) {
-              setMobileSearchOpen(false);
+      <div className={`flex min-w-0 items-center gap-[10px] ${mobileSearchOpen ? "flex-1" : ""} lg:flex-none`}>
+        {mobileSearchOpen ? (
+          <button
+            type="button"
+            onClick={closeMobileSearch}
+            aria-label="Close search"
+            className="flex size-[24px] shrink-0 items-center justify-center text-[20px] leading-none text-[#2b2b2b] lg:hidden"
+          >
+            ✕
+          </button>
+        ) : null}
+        <label
+          className={`flex min-w-0 items-center rounded-full transition-colors ${
+            mobileSearchOpen
+              ? "flex-1 justify-between border border-[blue] px-[10px] py-[2px]"
+              : "justify-center p-[6px]"
+          } lg:w-[clamp(290px,29.5vw,567px)] lg:justify-between lg:border lg:px-[clamp(15px,1.2vw,22px)] lg:py-[4px] ${
+            searchActive ? "lg:border-[blue]" : "lg:border-[#998e8a]"
+          }`}
+          onClick={() => {
+            if (!mobileSearchOpen) {
+              setMobileSearchOpen(true);
             }
           }}
-          placeholder={searchActive ? "" : "חיפוש חופשי"}
-          dir="rtl"
-          className={`${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
-        />
-      </label>
+        >
+          <span className="relative h-[12px] w-[10px] shrink-0 lg:h-[clamp(18px,1.15vw,22px)] lg:w-[clamp(15px,1vw,19px)]">
+            <Image
+              src={searchActive ? images.searchMobileBlue : images.searchMobile}
+              alt=""
+              fill
+              className="object-contain lg:hidden"
+              sizes="10px"
+            />
+            <Image
+              src={images.search}
+              alt=""
+              fill
+              className="hidden object-contain lg:block"
+              sizes="19px"
+            />
+          </span>
+          <input
+            ref={searchInputRef}
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => {
+              setSearchFocused(false);
+              if (!search.trim()) {
+                setMobileSearchOpen(false);
+              }
+            }}
+            placeholder={searchActive ? "" : "חיפוש חופשי"}
+            dir="rtl"
+            className={`${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
+          />
+        </label>
+      </div>
 
       <nav className={`${mobileSearchOpen ? "hidden" : "flex"} min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)] lg:flex`} dir="rtl">
         <CustomDropdown
@@ -510,15 +546,31 @@ function HeroContent({
 }) {
   const [promptFocused, setPromptFocused] = useState(false);
   const promptActive = promptFocused || prompt.length > 0;
+  const canSend = prompt.trim().length > 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const resizeTextarea = useCallback(() => {
+    const node = textareaRef.current;
+    if (!node) {
+      return;
+    }
+
+    node.style.height = "auto";
+    node.style.height = `${Math.min(node.scrollHeight, 220)}px`;
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [prompt, resizeTextarea]);
 
   return (
-    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:top-[226px] lg:mt-[309px] lg:gap-[19px] 2xl:top-[290px] 2xl:mt-[373px]">
-      <div className="flex w-full flex-col items-center gap-[14px] lg:gap-[19px] 2xl:gap-[28px]">
+    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:top-[226px] lg:mt-[309px] lg:gap-[14px] 2xl:top-[290px] 2xl:mt-[373px] 2xl:gap-[20px]">
+      <div className="flex w-full flex-col items-center gap-[14px] lg:gap-[16px] 2xl:gap-[28px]">
         <div className="flex flex-col items-center">
           <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
             <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" />
           </div>
-          <p className="font-ploni-yad mt-[-0.05em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
+          <p className="font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
             איי.אל
           </p>
         </div>
@@ -531,41 +583,68 @@ function HeroContent({
       <form
         onSubmit={onSubmit}
         id="hero-prompt-form"
-        className={`flex w-full max-w-[min(92vw,1046px)] items-center justify-end overflow-hidden rounded-full border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] transition-colors ${
+        className={`flex w-full max-w-[min(92vw,1046px)] items-end justify-end rounded-[40px] border bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] transition-colors lg:border-2 ${
           promptActive
             ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
             : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
         }`}
       >
-        <span className="flex w-full items-center justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
-          <button
-            type="button"
-            onClick={onHelp}
-            className={`relative flex size-[30px] shrink-0 items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
-              isHelpOpen ? "bg-[#d1e2ff]" : ""
-            }`}
-            aria-label="Prompt writing instructions"
-            aria-pressed={isHelpOpen}
-          >
-            <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
-              <Image
-                src={images.menuBook}
-                alt=""
-                fill
-                sizes="45px"
-                className={isHelpOpen ? "brightness-0" : undefined}
-              />
+        <span className="flex w-full items-end justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
+          <div className="group relative shrink-0">
+            <button
+              type="button"
+              onClick={onHelp}
+              className={`relative flex size-[30px] items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
+                isHelpOpen ? "bg-[#d1e2ff]" : ""
+              }`}
+              aria-label="Prompt writing instructions"
+              aria-pressed={isHelpOpen}
+            >
+              <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
+                <Image
+                  src={images.menuBook}
+                  alt=""
+                  fill
+                  sizes="45px"
+                  className={isHelpOpen ? "brightness-0" : undefined}
+                />
+              </span>
+            </button>
+            <span className="prompt-tooltip pointer-events-none absolute bottom-[calc(100%+8px)] right-0 hidden whitespace-nowrap rounded-[8px] px-[10px] py-[5px] text-[12px] leading-none opacity-0 transition-opacity group-hover:block group-hover:opacity-100 lg:text-[14px]">
+              הוראות
             </span>
-          </button>
-          <input
+          </div>
+          <textarea
+            ref={textareaRef}
             value={prompt}
-            onChange={(event) => onPromptChange(event.target.value)}
+            rows={1}
+            onChange={(event) => {
+              onPromptChange(event.target.value);
+              resizeTextarea();
+            }}
             onFocus={() => setPromptFocused(true)}
             onBlur={() => setPromptFocused(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             placeholder={promptActive ? "" : "לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול...."}
             dir="rtl"
-            className="min-w-0 flex-1 overflow-hidden bg-transparent text-right font-sans text-[14px] text-ellipsis whitespace-nowrap text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
+            className="min-w-0 flex-1 resize-none overflow-hidden bg-transparent py-[3px] text-right font-sans text-[14px] leading-[1.35] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
           />
+          {canSend ? (
+            <button
+              type="submit"
+              aria-label="שליחה"
+              className="relative flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[blue] p-[7px] transition-colors hover:bg-[#0010a8] lg:size-[42px] lg:p-[10px] 2xl:size-[53px] 2xl:p-[13px]"
+            >
+              <span className="relative block size-full">
+                <Image src={images.sendArrow} alt="" fill sizes="30px" />
+              </span>
+            </button>
+          ) : null}
         </span>
       </form>
       {isHelpOpen ? <InstructionsCard onClose={onHelp} /> : null}
@@ -635,11 +714,13 @@ function Collage({
   items,
   faded = false,
   shrinkIndex,
+  scrollProgress = 0,
   onOpenDetail,
 }: {
   items: CollageImage[];
   faded?: boolean;
   shrinkIndex?: number;
+  scrollProgress?: number;
   onOpenDetail?: (id: string) => void;
 }) {
   return (
@@ -650,6 +731,7 @@ function Collage({
           {...item}
           faded={faded}
           shrunk={index === shrinkIndex}
+          spin={spinForIndex(index, scrollProgress)}
           onClick={
             onOpenDetail
               ? () => {
@@ -676,9 +758,11 @@ function collageItemsForConfessions(layout: CollageImage[], confessions: Confess
 
 function ExtraConfessionsGrid({
   confessions,
+  scrollProgress = 0,
   onOpenDetail,
 }: {
   confessions: Confession[];
+  scrollProgress?: number;
   onOpenDetail: (id: string) => void;
 }) {
   if (confessions.length === 0) {
@@ -698,6 +782,7 @@ function ExtraConfessionsGrid({
             confessionId={confession.id}
             className={position.className}
             rotate={position.rotate}
+            spin={spinForIndex(index, scrollProgress)}
             onClick={() => onOpenDetail(confession.id)}
           />
         );
@@ -756,7 +841,7 @@ function Backdrop({ onClick }: { onClick?: () => void }) {
 
 function ScreenCanvas({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-dvh w-full flex-1 overflow-y-auto overflow-x-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
+    <div className="smooth-scroll relative min-h-dvh w-full flex-1 overflow-y-auto overflow-x-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
       {children}
     </div>
   );
@@ -785,22 +870,23 @@ function ChutzpahMeter({
   const showValue = hovering || dragging;
 
   return (
-    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-[760px] lg:flex-row lg:items-end lg:gap-[22px] 2xl:w-[1040px]">
-      <p className="shrink-0 text-right text-[14px] font-bold lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
+    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-[760px] lg:flex-row lg:items-center lg:gap-[22px] 2xl:w-[1040px]">
+      <p className="shrink-0 text-right text-[14px] font-bold lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
       <div
-        className="relative h-[63px] w-full max-w-[470px] lg:max-w-none"
+        dir="ltr"
+        className="chutzpah-meter relative h-[52px] w-full max-w-[470px] 2xl:h-[68px] 2xl:max-w-[640px]"
         onPointerEnter={() => setHovering(true)}
         onPointerLeave={() => setHovering(false)}
       >
         {showValue ? (
           <span
-            className="absolute top-0 z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-black shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px]"
-            style={{ left: `calc(${value}% + ${14.5 - value * 0.29}px)` }}
+            className="absolute top-0 z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
+            style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
           >
             {value}%
           </span>
         ) : null}
-        <div className="absolute left-0 top-[39px] h-5 w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8]">
+        <div className="absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] 2xl:top-[40px] 2xl:h-[27px]">
           <div className="h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
         </div>
         <input
@@ -809,13 +895,15 @@ function ChutzpahMeter({
           max={100}
           step={10}
           value={value}
+          dir="ltr"
           onPointerDown={() => setDragging(true)}
           onPointerUp={(event) => {
             setDragging(false);
             onRatingCommit?.(Number(event.currentTarget.value));
           }}
           onChange={(event) => onRatingChange?.(Number(event.target.value))}
-          className="chutzpah-range absolute left-0 top-[33px] h-[29px] w-full"
+          className="chutzpah-range absolute left-0 top-[26px] w-full 2xl:top-[35px]"
+          style={{ height: "var(--thumb-size)" }}
           aria-label="Chutzpah meter"
         />
       </div>
@@ -864,11 +952,11 @@ function ConfessionCard({
       }
     >
       <article
-        className="flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:h-[620px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:h-[720px]"
+        className="flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:h-[620px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:h-[850px]"
         dir="ltr"
       >
         <div
-          className={`relative h-[364px] w-full overflow-hidden lg:h-full lg:basis-[61.2%] 2xl:basis-[58.1%] ${
+          className={`relative aspect-square w-full overflow-hidden lg:h-full lg:aspect-square lg:w-auto lg:shrink-0 ${
             isPreview && selectedPreviewImageIndex === previewImageIndex ? "ring-4 ring-[blue]" : ""
           }`}
         >
@@ -929,34 +1017,34 @@ function ConfessionCard({
           ) : null}
         </div>
 
-        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 lg:m-0 lg:h-full lg:basis-[38.8%] lg:justify-start lg:px-[70px] lg:py-[20px] 2xl:basis-[41.9%] 2xl:px-[86px] 2xl:py-[40px]" dir="rtl">
+        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 text-right lg:m-0 lg:h-full lg:flex-1 lg:justify-start lg:px-[70px] lg:py-[20px] 2xl:px-[86px] 2xl:py-[40px]" dir="rtl">
           <button
             type="button"
             onClick={onClose}
-            className="mb-1 hidden size-[63px] items-center justify-center self-end text-[60px] leading-none text-[#2b2b2b] lg:flex"
+            className="mb-1 hidden size-[63px] items-center justify-center self-start text-[60px] leading-none text-[#2b2b2b] lg:flex"
             aria-label="Close"
           >
             ×
           </button>
           <div className="flex w-full flex-col items-end gap-[13px]">
             <div className="flex w-full flex-col items-end gap-1.5">
-              {isPreview ? <p className="text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
+              {isPreview ? <p className="w-full text-right text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
               <div className="flex w-full flex-col items-end gap-0.5">
-                <h1 className="font-haim text-[26px] leading-none text-[blue] lg:text-[36px] 2xl:text-[52px]">{confession.title}</h1>
-                <p className="text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
+                <h1 className="w-full text-right font-haim text-[26px] leading-none text-[blue] lg:text-[36px] 2xl:text-[52px]">{confession.title}</h1>
+                <p className="w-full text-right text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
               </div>
             </div>
-            <p className="w-full text-[14px] leading-[1.296] text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">{confession.content}</p>
+            <p className="w-full text-right text-[14px] leading-[1.296] text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">{confession.content}</p>
             {!isPreview ? (
-              <p className="w-full text-[14px] lg:text-[18px] 2xl:text-[24px]">
+              <p className="w-full text-right text-[14px] lg:text-[18px] 2xl:text-[24px]">
                 <span className="text-[#998e8a]">דירוג חוצפמטר ממוצע:</span>{" "}
                 <span className="text-[#2b2b2b]">{confession.averageScore}%</span>
               </p>
             ) : null}
           </div>
           <div className="mt-auto flex w-full flex-col items-end gap-2">
-            <span className="hidden font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
-            <div className="flex w-full flex-wrap items-center justify-end gap-2">
+            <span className="hidden w-full text-right font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
+            <div className="flex w-full flex-wrap items-center justify-start gap-2">
               {confession.tags.map((tag) => (
                 <TagPill key={tag}>{tag}</TagPill>
               ))}
@@ -966,7 +1054,7 @@ function ConfessionCard({
       </article>
 
       {isPreview ? (
-        <div className="flex items-center gap-[10px] lg:mt-1">
+        <div className="flex items-center gap-[10px] lg:mt-1" dir="rtl">
           <button
             type="button"
             onClick={() => onPublish?.(selectedImage)}
@@ -1093,16 +1181,16 @@ function InstructionsContent() {
 
   return (
     <>
-      <h2 className="font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
-      <div className="flex flex-col gap-[6px]">
+      <h2 className="w-full text-right font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
+      <div className="flex w-full flex-col gap-[10px] lg:gap-[14px]">
         {rows.map(([icon, text, color]) => (
           <p
             key={text}
-            className="flex items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px]"
+            className="flex w-full items-center justify-end gap-[16px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:gap-[22px] lg:text-[18px] 2xl:text-[24px]"
             dir="ltr"
           >
             <span dir="rtl">{text}</span>
-            <span className={`flex w-[19px] shrink-0 items-center justify-center font-bold ${color}`}>{icon}</span>
+            <span className={`flex w-[22px] shrink-0 items-center justify-center text-[20px] font-bold lg:w-[26px] lg:text-[24px] 2xl:w-[30px] 2xl:text-[28px] ${color}`}>{icon}</span>
           </p>
         ))}
       </div>
@@ -1113,7 +1201,7 @@ function InstructionsContent() {
 function InstructionsCard({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="relative z-40 mt-[10px] flex w-full max-w-[min(92vw,1046px)] flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:px-[71px]"
+      className="fixed left-1/2 top-1/2 z-50 flex w-[min(92vw,1046px)] -translate-x-1/2 -translate-y-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:static lg:z-40 lg:mt-[10px] lg:max-w-[min(92vw,1046px)] lg:translate-x-0 lg:translate-y-0 lg:px-[71px]"
       dir="rtl"
     >
       <button
@@ -1143,6 +1231,7 @@ function HomeScreen({
   showSplashIntro,
   showSuccess,
   newConfession,
+  newConfessionEntering,
   showInstructions,
   onPromptChange,
   onSubmit,
@@ -1169,6 +1258,7 @@ function HomeScreen({
   showSplashIntro?: boolean;
   showSuccess?: boolean;
   newConfession?: Confession;
+  newConfessionEntering?: boolean;
   showInstructions?: boolean;
   onPromptChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -1182,9 +1272,41 @@ function HomeScreen({
   onSortChange: (value: SortValue) => void;
   onResetFilters: () => void;
 }) {
-  const collageConfessions = newConfession
-    ? visibleConfessions.filter((confession) => confession.id !== newConfession.id)
-    : visibleConfessions;
+  const mainRef = useRef<HTMLElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const reflowKey = `${sort}|${country}|${topic}`;
+
+  useEffect(() => {
+    const node = mainRef.current;
+    if (!node) {
+      return;
+    }
+
+    let frame = 0;
+    const handleScroll = () => {
+      if (frame) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        setScrollProgress(Math.max(0, Math.min(1, node.scrollTop / 600)));
+      });
+    };
+
+    node.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      node.removeEventListener("scroll", handleScroll);
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  }, []);
+
+  const collageConfessions =
+    newConfession && newConfessionEntering
+      ? visibleConfessions.filter((confession) => confession.id !== newConfession.id)
+      : visibleConfessions;
   const mobileItems = collageItemsForConfessions(mobileCollage, collageConfessions);
   const desktopItems = collageItemsForConfessions(desktopCollage, collageConfessions);
 
@@ -1211,14 +1333,14 @@ function HomeScreen({
       dir="rtl"
     >
       {renderHeader()}
-      <main className="relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
-        <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
-          <Collage items={mobileItems} shrinkIndex={newConfession ? 4 : undefined} onOpenDetail={onOpenDetail} />
+      <main ref={mainRef} className="smooth-scroll relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
+        <div key={`m-${reflowKey}`} className="gallery-reflow absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
+          <Collage items={mobileItems} shrinkIndex={newConfession && newConfessionEntering ? 4 : undefined} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
         </div>
-        <div className="absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden lg:block">
-          <Collage items={desktopItems} shrinkIndex={newConfession ? 6 : undefined} onOpenDetail={onOpenDetail} />
+        <div key={`d-${reflowKey}`} className="gallery-reflow absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden lg:block">
+          <Collage items={desktopItems} shrinkIndex={newConfession && newConfessionEntering ? 6 : undefined} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
         </div>
-        {newConfession ? <NewConfessionIllustration confession={newConfession} /> : null}
+        {newConfession && newConfessionEntering ? <NewConfessionIllustration confession={newConfession} /> : null}
         <HeroContent
           prompt={prompt}
           error={error}
@@ -1230,7 +1352,7 @@ function HomeScreen({
         {showSplashIntro ? <SplashIntro onDone={onSplashIntroDone} /> : null}
         {showSuccess ? <SuccessToast onDismiss={onDismissSuccess} /> : null}
         {hasNoResults ? <EmptyState onReset={onResetFilters} /> : null}
-        <ExtraConfessionsGrid confessions={collageConfessions.slice(8)} onOpenDetail={onOpenDetail} />
+        <ExtraConfessionsGrid confessions={collageConfessions.slice(8)} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
       </main>
     </div>
   );
@@ -1268,6 +1390,7 @@ export default function Home() {
   const [selectedConfessionId, setSelectedConfessionId] = useState("");
   const [draft, setDraft] = useState<ConfessionDraft>();
   const [newConfession, setNewConfession] = useState<Confession>();
+  const [newConfessionEntering, setNewConfessionEntering] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string>();
   const [actionError, setActionError] = useState<string>();
@@ -1351,6 +1474,15 @@ export default function Home() {
     return () => window.clearTimeout(timer);
   }, [showSuccessToast]);
 
+  useEffect(() => {
+    if (!newConfessionEntering) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setNewConfessionEntering(false), 1100);
+    return () => window.clearTimeout(timer);
+  }, [newConfessionEntering]);
+
   async function handlePromptSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -1408,6 +1540,7 @@ export default function Home() {
       const body = (await response.json()) as { confession: Confession };
       setConfessions((items) => [body.confession, ...items.filter((item) => item.id !== body.confession.id)]);
       setNewConfession(body.confession);
+      setNewConfessionEntering(true);
       setDraft(undefined);
       setPrompt("");
       setShowSuccessToast(true);
@@ -1536,6 +1669,7 @@ export default function Home() {
       showSplashIntro={showSplashIntro}
       showSuccess={screen === "success" && showSuccessToast}
       newConfession={newConfession}
+      newConfessionEntering={newConfessionEntering}
       showInstructions={showInstructions}
       onPromptChange={(value) => {
         setPrompt(value);

@@ -153,8 +153,8 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
             "Treat short but concrete prompts as valid. If the prompt includes an action and a location, country, nationality, or travel clue, infer the missing details and expand it into a coherent confession.",
             "Only reject prompts that are empty, gibberish, too vague to identify an event, or clearly not a confession.",
             "For invalid prompts, return a specific Hebrew user-facing error, for example: {\"valid\":false,\"error\":\"הוסיפו מה קרה בפועל, איפה זה קרה ולמה זו חוצפה.\"}. Never return the literal placeholder text \"Hebrew error\".",
-            "For valid prompts, return {\"valid\":true,\"title\":\"כותרת בעברית\",\"content\":\"הטקסט המקורי של המשתמש ללא שינוי\",\"country\":\"מדינה/מיקום בעברית\",\"topic\":\"קטגוריה בעברית\",\"tags\":[\"עד 3 תגיות בעברית\"]}.",
-            "Do not rewrite, expand, summarize, correct, or add to the user's confession paragraph. The content field must preserve the user's original prompt exactly.",
+            "For valid prompts, return {\"valid\":true,\"title\":\"כותרת בעברית\",\"content\":\"פסקת וידוי בעברית\",\"country\":\"מדינה/מיקום בעברית\",\"topic\":\"קטגוריה בעברית\",\"tags\":[\"עד 3 תגיות בעברית\"]}.",
+            "Rewrite and complete the user's story into a vivid, coherent first-person Hebrew confession paragraph. Fill in natural missing details so the text matches the story the user described and produces a more accurate image, while staying faithful to what actually happened. Keep it to 2-4 sentences.",
             "Keep the tone funny, light, sarcastic, and non-graphic. If the prompt describes rude or aggressive behavior, frame it as an embarrassing/regretful travel confession and do not glorify harm.",
           ].join(" "),
       },
@@ -183,7 +183,7 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
 
   return {
     title: parsed.title?.trim() || "וידוי חדש",
-    content: trimmedPrompt,
+    content: parsed.content?.trim() || trimmedPrompt,
     country: parsed.country?.trim() || "אחר",
     topic: parsed.topic?.trim() || "אחר",
     tags: normalizeTags(parsed.tags),

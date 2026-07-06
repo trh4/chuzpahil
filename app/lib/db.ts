@@ -62,7 +62,7 @@ export function mapConfession(row: Record<string, unknown>): Confession {
     country: stringValue(row.country, "אחר"),
     topic: stringValue(row.topic, "אחר"),
     tags: stringArrayValue(row.tags),
-    image: seedKey === "honeymoon" ? imagePaths.beach : seedKey === "gozleme" ? imagePaths.tour : imageUrl,
+    image: seedKey === "honeymoon" ? imagePaths.tour : seedKey === "gozleme" ? imagePaths.beach : imageUrl,
     averageScore: Math.round(averageScore),
     ratingsCount: Number(row.ratings_count),
   };
