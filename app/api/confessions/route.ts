@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server";
 import { jsonError, unknownErrorMessage } from "@/app/lib/api";
 import { mapConfession, sql } from "@/app/lib/db";
-import type { SortValue } from "@/app/lib/confessions";
+import { countryOptions, topicOptions, type SortValue } from "@/app/lib/confessions";
 
 export const runtime = "nodejs";
 
@@ -25,6 +25,42 @@ function normalizeSort(value: string | null): SortValue {
   }
 
   return "random";
+}
+
+function buildFilterOptions(rows: Record<string, unknown>[]) {
+  const countries = new Set<string>(countryOptions);
+  const topics = new Set<string>(topicOptions);
+  const staticTopics = new Set<string>(topicOptions);
+
+  for (const row of rows) {
+    const country = typeof row.country === "string" ? row.country.trim() : "";
+    const topic = typeof row.topic === "string" ? row.topic.trim() : "";
+    const tags = Array.isArray(row.tags) ? row.tags.filter((tag): tag is string => typeof tag === "string").map((tag) => tag.trim()) : [];
+
+    if (country && !staticTopics.has(country)) {
+      countries.add(country);
+    }
+    if (topic) {
+      topics.add(topic);
+    }
+
+    for (const tag of tags) {
+      if (!tag || tag === "אחר") {
+        continue;
+      }
+
+      if (staticTopics.has(tag)) {
+        topics.add(tag);
+      } else {
+        countries.add(tag);
+      }
+    }
+  }
+
+  return {
+    countries: [...countries],
+    topics: [...topics],
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -85,8 +121,13 @@ export async function GET(request: NextRequest) {
     `;
 
     const rows = await sql.query(query, params);
+    const filterRows = await sql`
+      SELECT country, topic, tags
+      FROM confessions
+      WHERE status = 'published'
+    `;
 
-    return Response.json({ confessions: rows.map(mapConfession) });
+    return Response.json({ confessions: rows.map(mapConfession), filterOptions: buildFilterOptions(filterRows) });
   } catch (error) {
     return jsonError(unknownErrorMessage(error));
   }

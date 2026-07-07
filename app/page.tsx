@@ -48,6 +48,14 @@ const images = {
 
 const SPLASH_INTRO_DURATION_MS = 2200;
 const REDUCED_MOTION_SPLASH_DURATION_MS = 180;
+const SAVE_LOADING_MIN_DURATION_MS = 8000;
+const DESKTOP_PROMPT_PLACEHOLDER = "לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול....";
+const MOBILE_PROMPT_PLACEHOLDER = "איפה הייתם קצת ״הישראלי המכוער?";
+
+type FilterOptions = {
+  countries: string[];
+  topics: string[];
+};
 
 type CollageImage = {
   src: string;
@@ -63,12 +71,12 @@ type CollageImage = {
 // Scattered scroll confessions live only in the far-left and far-right thirds so
 // they never cover the centered logo/title/prompt.
 const extraCollagePositions = [
-  { className: "left-[2%] top-[8%] w-[42vw] lg:left-[7%] lg:w-[19vw]", rotate: "-rotate-[13deg]" },
-  { className: "left-[62%] top-[2%] w-[46vw] lg:left-[75%] lg:w-[17vw]", rotate: "rotate-[10deg]" },
-  { className: "left-[-8%] top-[28%] w-[38vw] lg:left-[68%] lg:top-[10%] lg:w-[21vw]", rotate: "rotate-[19deg]" },
-  { className: "left-[64%] top-[48%] w-[44vw] lg:left-[5%] lg:top-[45%] lg:w-[23vw]", rotate: "rotate-[8deg]" },
-  { className: "left-[1%] top-[58%] w-[45vw] lg:left-[73%] lg:top-[42%] lg:w-[18vw]", rotate: "-rotate-[17deg]" },
-  { className: "left-[63%] top-[78%] w-[42vw] lg:left-[81%] lg:top-[61%] lg:w-[16vw]", rotate: "rotate-[14deg]" },
+  { className: "left-[-18%] top-[3%] w-[68.5vw] lg:left-[7%] lg:top-[2%] lg:w-[30vw] 2xl:w-[30vw]", rotate: "-rotate-[13deg]" },
+  { className: "left-[60%] top-[6%] w-[67.4vw] lg:left-[75%] lg:top-[8%] lg:w-[17.4vw] 2xl:w-[17.4vw]", rotate: "rotate-[10deg]" },
+  { className: "left-[-12%] top-[30%] w-[38.5vw] lg:left-[70%] lg:top-[31%] lg:w-[29.6vw] 2xl:w-[29.6vw]", rotate: "rotate-[19deg]" },
+  { className: "left-[68%] top-[35%] w-[41vw] lg:left-[2%] lg:top-[34%] lg:w-[18.7vw] 2xl:w-[18.7vw]", rotate: "rotate-[8deg]" },
+  { className: "left-[-22%] top-[61%] w-[54.9vw] lg:left-[76%] lg:top-[63%] lg:w-[17.7vw] 2xl:w-[17.7vw]", rotate: "-rotate-[17deg]" },
+  { className: "left-[56%] top-[68%] w-[84.1vw] lg:left-[4%] lg:top-[67%] lg:w-[31.9vw] 2xl:w-[31.9vw]", rotate: "rotate-[14deg]" },
 ];
 
 // Positions are percentages of the page, sizes are relative to the viewport
@@ -335,12 +343,13 @@ function CustomDropdown<Value extends string>({
               role="option"
               aria-selected={option.value === value}
               className={optionClassName}
+              dir="rtl"
               onClick={() => {
                 onChange(option.value);
                 setOpen(false);
               }}
             >
-              {option.label}
+              <span className="block w-full text-right">{option.label}</span>
             </button>
           ))}
         </div>
@@ -529,6 +538,15 @@ function Header({
   );
 }
 
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 19V5" stroke="#FFFCF8" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.25 10.75L12 5L17.75 10.75" stroke="#FFFCF8" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function HeroContent({
   prompt,
   error,
@@ -545,9 +563,11 @@ function HeroContent({
   onHelp: () => void;
 }) {
   const [promptFocused, setPromptFocused] = useState(false);
+  const [isMobilePrompt, setIsMobilePrompt] = useState(false);
   const promptActive = promptFocused || prompt.length > 0;
   const canSend = prompt.trim().length > 0;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const placeholder = isMobilePrompt ? MOBILE_PROMPT_PLACEHOLDER : DESKTOP_PROMPT_PLACEHOLDER;
 
   const resizeTextarea = useCallback(() => {
     const node = textareaRef.current;
@@ -563,9 +583,19 @@ function HeroContent({
     resizeTextarea();
   }, [prompt, resizeTextarea]);
 
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1023px)");
+    const syncMobilePrompt = () => setIsMobilePrompt(media.matches);
+
+    syncMobilePrompt();
+    media.addEventListener("change", syncMobilePrompt);
+
+    return () => media.removeEventListener("change", syncMobilePrompt);
+  }, []);
+
   return (
-    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[9px] px-5 lg:top-[226px] lg:mt-[309px] lg:gap-[14px] 2xl:top-[290px] 2xl:mt-[373px] 2xl:gap-[20px]">
-      <div className="flex w-full flex-col items-center gap-[14px] lg:gap-[16px] 2xl:gap-[28px]">
+    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[22px] px-5 lg:fixed lg:left-1/2 lg:top-1/2 lg:mt-0 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-[28px] 2xl:gap-[40px]">
+      <div className="flex w-full flex-col items-center gap-[22px] lg:gap-[28px] 2xl:gap-[40px]">
         <div className="flex flex-col items-center">
           <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
             <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" />
@@ -580,74 +610,76 @@ function HeroContent({
         </p>
       </div>
 
-      <form
-        onSubmit={onSubmit}
-        id="hero-prompt-form"
-        className={`flex w-full max-w-[min(92vw,1046px)] items-end justify-end rounded-[40px] border bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(7px,0.75vw,14.5px)] transition-colors lg:border-2 ${
-          promptActive
-            ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
-            : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
-        }`}
-      >
-        <span className="flex w-full items-end justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
-          <div className="group relative shrink-0">
-            <button
-              type="button"
-              onClick={onHelp}
-              className={`relative flex size-[30px] items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
-                isHelpOpen ? "bg-[#d1e2ff]" : ""
-              }`}
-              aria-label="Prompt writing instructions"
-              aria-pressed={isHelpOpen}
-            >
-              <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
-                <Image
-                  src={images.menuBook}
-                  alt=""
-                  fill
-                  sizes="45px"
-                  className={isHelpOpen ? "brightness-0" : undefined}
-                />
+      <div className="relative flex w-full max-w-[min(92vw,1046px)] flex-col items-center">
+        <form
+          onSubmit={onSubmit}
+          id="hero-prompt-form"
+          className={`flex w-full items-center justify-end rounded-[40px] border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(9px,0.75vw,14.5px)] transition-colors ${
+            promptActive
+              ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
+              : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
+          }`}
+        >
+          <span className="flex w-full items-center justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
+            <div className="group relative flex shrink-0 items-center">
+              <button
+                type="button"
+                onClick={onHelp}
+                className={`relative flex size-[30px] items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
+                  isHelpOpen ? "bg-[#d1e2ff]" : ""
+                }`}
+                aria-label="Prompt writing instructions"
+                aria-pressed={isHelpOpen}
+              >
+                <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
+                  <Image
+                    src={images.menuBook}
+                    alt=""
+                    fill
+                    sizes="45px"
+                    className={isHelpOpen ? "brightness-0" : undefined}
+                  />
+                </span>
+              </button>
+              <span className="prompt-tooltip pointer-events-none absolute bottom-[calc(100%+8px)] right-0 hidden whitespace-nowrap rounded-[8px] px-[10px] py-[5px] text-[12px] leading-none opacity-0 transition-opacity group-hover:block group-hover:opacity-100 lg:text-[14px]">
+                הוראות
               </span>
-            </button>
-            <span className="prompt-tooltip pointer-events-none absolute bottom-[calc(100%+8px)] right-0 hidden whitespace-nowrap rounded-[8px] px-[10px] py-[5px] text-[12px] leading-none opacity-0 transition-opacity group-hover:block group-hover:opacity-100 lg:text-[14px]">
-              הוראות
-            </span>
-          </div>
-          <textarea
-            ref={textareaRef}
-            value={prompt}
-            rows={1}
-            onChange={(event) => {
-              onPromptChange(event.target.value);
-              resizeTextarea();
-            }}
-            onFocus={() => setPromptFocused(true)}
-            onBlur={() => setPromptFocused(false)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                event.currentTarget.form?.requestSubmit();
-              }
-            }}
-            placeholder={promptActive ? "" : "לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול...."}
-            dir="rtl"
-            className="min-w-0 flex-1 resize-none overflow-hidden bg-transparent py-[3px] text-right font-sans text-[14px] leading-[1.35] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
-          />
-          {canSend ? (
-            <button
-              type="submit"
-              aria-label="שליחה"
-              className="relative flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[blue] p-[7px] transition-colors hover:bg-[#0010a8] lg:size-[42px] lg:p-[10px] 2xl:size-[53px] 2xl:p-[13px]"
-            >
-              <span className="relative block size-full">
-                <Image src={images.sendArrow} alt="" fill sizes="30px" />
-              </span>
-            </button>
-          ) : null}
-        </span>
-      </form>
-      {isHelpOpen ? <InstructionsCard onClose={onHelp} /> : null}
+            </div>
+            <textarea
+              ref={textareaRef}
+              value={prompt}
+              rows={1}
+              onChange={(event) => {
+                onPromptChange(event.target.value);
+                resizeTextarea();
+              }}
+              onFocus={() => setPromptFocused(true)}
+              onBlur={() => setPromptFocused(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
+              placeholder={promptActive ? "" : placeholder}
+              dir="rtl"
+              className="min-w-0 flex-1 resize-none overflow-hidden bg-transparent py-0 text-right font-sans text-[14px] leading-[1.35] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
+            />
+            {canSend ? (
+              <button
+                type="submit"
+                aria-label="שליחה"
+                className="relative flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[blue] p-[6px] transition-colors hover:bg-[#0010a8] lg:size-[42px] lg:p-[9px] 2xl:size-[53px] 2xl:p-[12px]"
+              >
+                <span className="relative block size-full">
+                  <SendIcon />
+                </span>
+              </button>
+            ) : null}
+          </span>
+        </form>
+        {isHelpOpen ? <InstructionsCard onClose={onHelp} /> : null}
+      </div>
       {error ? (
         <div className="fixed left-1/2 top-1/2 z-50 flex w-[min(86vw,348px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#a90e25] bg-[#ffe4d7] px-8 py-[27.566px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)]">
           <strong className="font-haim text-[40px] leading-none text-[#a90e25]">לא משהו...</strong>
@@ -727,7 +759,7 @@ function Collage({
     <>
       {items.map((item, index) => (
         <FloatingIllustration
-          key={`${item.src}-${item.className}`}
+          key={`${item.confessionId ?? item.src}-${index}`}
           {...item}
           faded={faded}
           shrunk={index === shrinkIndex}
@@ -769,31 +801,41 @@ function ExtraConfessionsGrid({
     return null;
   }
 
-  return (
-    <section className="relative z-10 mx-auto mt-[min(34dvh,300px)] h-[calc(120vw+160px)] min-h-[720px] w-full pb-20 lg:h-[820px] 2xl:h-[980px]">
-      {confessions.map((confession, index) => {
-        const position = extraCollagePositions[index % extraCollagePositions.length];
+  const rows = Math.ceil(confessions.length / extraCollagePositions.length);
 
-        return (
-          <FloatingIllustration
-            key={confession.id}
-            src={confession.image}
-            alt={confession.title}
-            confessionId={confession.id}
-            className={position.className}
-            rotate={position.rotate}
-            spin={spinForIndex(index, scrollProgress)}
-            onClick={() => onOpenDetail(confession.id)}
-          />
-        );
-      })}
+  return (
+    <section
+      className="relative z-10 mx-auto mt-[min(34dvh,300px)] min-h-[720px] w-full pb-20"
+      style={{ height: `${rows * 820}px` }}
+    >
+      {Array.from({ length: rows }, (_, row) => (
+        <div key={row} className="absolute inset-x-0 h-[820px]" style={{ top: `${row * 820}px` }}>
+          {confessions.slice(row * extraCollagePositions.length, (row + 1) * extraCollagePositions.length).map((confession, index) => {
+            const position = extraCollagePositions[index % extraCollagePositions.length];
+            const absoluteIndex = row * extraCollagePositions.length + index;
+
+            return (
+              <FloatingIllustration
+                key={confession.id}
+                src={confession.image}
+                alt={confession.title}
+                confessionId={confession.id}
+                className={position.className}
+                rotate={position.rotate}
+                spin={spinForIndex(absoluteIndex, scrollProgress)}
+                onClick={() => onOpenDetail(confession.id)}
+              />
+            );
+          })}
+        </div>
+      ))}
     </section>
   );
 }
 
 function NewConfessionIllustration({ confession }: { confession: Confession }) {
   return (
-    <div className="absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_1000ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
+    <div className="absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_800ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
       <div className="relative aspect-square w-[81%] rotate-[-15.76deg] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)]">
         <Image src={confession.image} alt={confession.title} fill className="object-cover" sizes="(min-width: 1024px) 25vw, 64vw" />
       </div>
@@ -849,7 +891,7 @@ function ScreenCanvas({ children }: { children: ReactNode }) {
 
 function TagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-[#998e8a] px-2 py-0.5 font-sans text-[14px] text-[#745447] lg:text-[18px] 2xl:text-[24px]">
+    <span className="rounded-full border border-[#998e8a] px-2 py-0.5 text-right font-sans text-[14px] text-[#745447] lg:text-[18px] 2xl:text-[24px]" dir="rtl">
       {children}
     </span>
   );
@@ -870,23 +912,26 @@ function ChutzpahMeter({
   const showValue = hovering || dragging;
 
   return (
-    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-[760px] lg:flex-row lg:items-center lg:gap-[22px] 2xl:w-[1040px]">
-      <p className="shrink-0 text-right text-[14px] font-bold lg:text-[20px] 2xl:text-[26px]">דרג.י בחוצפמטר:</p>
+    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-auto lg:flex-row-reverse lg:items-end lg:gap-[22.336px]">
+      <p className="w-full shrink-0 text-right text-[14px] font-bold lg:w-auto lg:whitespace-nowrap lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]">
+        <span className="lg:hidden">דרגי בחוצפמטר</span>
+        <span className="hidden lg:inline">דרג.י בחוצפמטר:</span>
+      </p>
       <div
         dir="ltr"
-        className="chutzpah-meter relative h-[52px] w-full max-w-[470px] 2xl:h-[68px] 2xl:max-w-[640px]"
+        className="chutzpah-meter relative h-[52px] w-full max-w-[470px] lg:h-[63px] 2xl:h-[68px] 2xl:max-w-[640px]"
         onPointerEnter={() => setHovering(true)}
         onPointerLeave={() => setHovering(false)}
       >
         {showValue ? (
           <span
-            className="absolute top-0 z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
+            className="absolute top-[-4px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
             style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
           >
             {value}%
           </span>
         ) : null}
-        <div className="absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] 2xl:top-[40px] 2xl:h-[27px]">
+        <div className="absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] lg:top-[39px] 2xl:top-[40px] 2xl:h-[27px]">
           <div className="h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
         </div>
         <input
@@ -902,7 +947,7 @@ function ChutzpahMeter({
             onRatingCommit?.(Number(event.currentTarget.value));
           }}
           onChange={(event) => onRatingChange?.(Number(event.target.value))}
-          className="chutzpah-range absolute left-0 top-[26px] w-full 2xl:top-[35px]"
+          className="chutzpah-range absolute left-0 top-[26px] w-full lg:top-[34px] 2xl:top-[35px]"
           style={{ height: "var(--thumb-size)" }}
           aria-label="Chutzpah meter"
         />
@@ -948,7 +993,7 @@ function ConfessionCard({
       className={
         isPreview
           ? "relative z-20 mx-auto mt-[80px] flex w-[342px] flex-col items-center gap-[22px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
-          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
+          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-[160px] lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
       }
     >
       <article
@@ -978,7 +1023,7 @@ function ConfessionCard({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-[14px] top-[10px] z-20 flex size-[42px] items-center justify-center text-[32px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
+              className="absolute right-[25px] top-[10px] z-20 flex size-[50px] items-center justify-center text-[38px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
               aria-label="Close"
             >
               ×
@@ -1018,14 +1063,16 @@ function ConfessionCard({
         </div>
 
         <div className="mt-5 flex w-[292px] flex-col items-end gap-4 text-right lg:m-0 lg:h-full lg:flex-1 lg:justify-start lg:px-[70px] lg:py-[20px] 2xl:px-[86px] 2xl:py-[40px]" dir="rtl">
-          <button
-            type="button"
-            onClick={onClose}
-            className="mb-1 hidden size-[63px] items-center justify-center self-start text-[60px] leading-none text-[#2b2b2b] lg:flex"
-            aria-label="Close"
-          >
-            ×
-          </button>
+          {!isPreview ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="mb-1 hidden size-[63px] items-center justify-center self-end text-[60px] leading-none text-[#2b2b2b] lg:flex"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          ) : null}
           <div className="flex w-full flex-col items-end gap-[13px]">
             <div className="flex w-full flex-col items-end gap-1.5">
               {isPreview ? <p className="w-full text-right text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
@@ -1044,7 +1091,7 @@ function ConfessionCard({
           </div>
           <div className="mt-auto flex w-full flex-col items-end gap-2">
             <span className="hidden w-full text-right font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
-            <div className="flex w-full flex-wrap items-center justify-start gap-2">
+            <div className="flex w-full flex-wrap items-center justify-end gap-2" dir="ltr">
               {confession.tags.map((tag) => (
                 <TagPill key={tag}>{tag}</TagPill>
               ))}
@@ -1171,26 +1218,50 @@ function EmptyState({ onReset }: { onReset: () => void }) {
   );
 }
 
+function CheckInstructionIcon() {
+  return (
+    <svg viewBox="0 0 18 18" aria-hidden="true" className="size-[18px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 9.25L7.35 12.6L14 5.9" stroke="#61A605" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function XInstructionIcon() {
+  return (
+    <svg viewBox="0 0 19 12.667" aria-hidden="true" className="h-[12.667px] w-[19px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.2 2.55L13.8 11.15M13.8 2.55L5.2 11.15" stroke="#C4142F" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ExclamationInstructionIcon() {
+  return (
+    <span aria-hidden="true" className="flex h-[23.294px] w-[18px] items-center justify-center text-center text-[23.294px] font-bold leading-none text-[#fbb03b]">
+      !
+    </span>
+  );
+}
+
 function InstructionsContent() {
   const rows = [
-    ["✓", "תנו ג׳וס- תארו מה עשיתם, איפה? למה? כמה? עם מי? ומה עבר לכם בראש", "text-[#61a605]"],
-    ["✓", "תהיו ספציפיים- ככל שתהיו ספציפיים וכנים יותר התוצאה תהיה מדויקת יותר", "text-[#61a605]"],
-    ["×", "לא להתקמצן במידע... משפט אחד/ כמה מילים לא נחשבות לוידוי", "text-[red]"],
-    ["!", "שגר ושכח! תחשבו טוב טוב לפני שאתם מפרסמים... אין דרך חזרה!", "text-[#fbb03b]"],
+    { icon: <CheckInstructionIcon />, text: "תנו ג׳וס- תארו מה עשיתם, איפה? למה? כמה? עם מי? ומה עבר לכם בראש" },
+    { icon: <CheckInstructionIcon />, text: "תהיו ספציפיים- ככל שתהיו ספציפיים וכנים יותר התוצאה תהיה מדויקת יותר" },
+    { icon: <XInstructionIcon />, text: "לא להתקמצן במידע... משפט אחד/ כמה מילים לא נחשבות לוידוי" },
+    { icon: <ExclamationInstructionIcon />, text: "שגר ושכח! תחשבו טוב טוב לפני שאתם מפרסמים... אין דרך חזרה!" },
   ];
 
   return (
     <>
       <h2 className="w-full text-right font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
       <div className="flex w-full flex-col gap-[10px] lg:gap-[14px]">
-        {rows.map(([icon, text, color]) => (
+        {rows.map(({ icon, text }) => (
           <p
             key={text}
             className="flex w-full items-center justify-end gap-[16px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:gap-[22px] lg:text-[18px] 2xl:text-[24px]"
             dir="ltr"
           >
             <span dir="rtl">{text}</span>
-            <span className={`flex w-[22px] shrink-0 items-center justify-center text-[20px] font-bold lg:w-[26px] lg:text-[24px] 2xl:w-[30px] 2xl:text-[28px] ${color}`}>{icon}</span>
+            <span className="flex w-[19px] shrink-0 items-center justify-center">{icon}</span>
           </p>
         ))}
       </div>
@@ -1201,7 +1272,7 @@ function InstructionsContent() {
 function InstructionsCard({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="fixed left-1/2 top-1/2 z-50 flex w-[min(92vw,1046px)] -translate-x-1/2 -translate-y-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:static lg:z-40 lg:mt-[10px] lg:max-w-[min(92vw,1046px)] lg:translate-x-0 lg:translate-y-0 lg:px-[71px]"
+      className="absolute left-1/2 top-[calc(100%+10px)] z-50 flex w-full -translate-x-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:z-40 lg:px-[71px]"
       dir="rtl"
     >
       <button
@@ -1274,7 +1345,7 @@ function HomeScreen({
 }) {
   const mainRef = useRef<HTMLElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const reflowKey = `${sort}|${country}|${topic}`;
+  const reflowKey = `${sort}|${country}|${topic}|${search}|${visibleConfessions.map((confession) => confession.id).join(",")}`;
 
   useEffect(() => {
     const node = mainRef.current;
@@ -1387,6 +1458,10 @@ function draftToConfession(draft: ConfessionDraft): Confession {
 export default function Home() {
   const [screen, setScreen] = useState<Screen>("home");
   const [confessions, setConfessions] = useState<Confession[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    countries: [...countryOptions],
+    topics: [...topicOptions],
+  });
   const [selectedConfessionId, setSelectedConfessionId] = useState("");
   const [draft, setDraft] = useState<ConfessionDraft>();
   const [newConfession, setNewConfession] = useState<Confession>();
@@ -1406,10 +1481,11 @@ export default function Home() {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [showSplashIntro, setShowSplashIntro] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [shuffleNonce, setShuffleNonce] = useState(0);
 
   const visibleConfessions = confessions;
-  const countries = [...countryOptions];
-  const topics = [...topicOptions];
+  const countries = filterOptions.countries;
+  const topics = filterOptions.topics;
   const selectedConfession = confessions.find((item) => item.id === selectedConfessionId);
   const previewConfession = draft ? draftToConfession(draft) : undefined;
   const hideSplashIntro = useCallback(() => setShowSplashIntro(false), []);
@@ -1429,6 +1505,9 @@ export default function Home() {
           params.set("topic", topic);
         }
         params.set("sort", sort);
+        if (sort === "random") {
+          params.set("shuffle", String(shuffleNonce));
+        }
 
         try {
           const response = await fetch(`/api/confessions?${params.toString()}`, {
@@ -1440,8 +1519,15 @@ export default function Home() {
             throw new Error(await responseError(response));
           }
 
-          const body = (await response.json()) as { confessions: Confession[] };
+          const body = (await response.json()) as {
+            confessions: Confession[];
+            filterOptions?: Partial<FilterOptions>;
+          };
           setConfessions(body.confessions);
+          setFilterOptions({
+            countries: body.filterOptions?.countries?.length ? body.filterOptions.countries : [...countryOptions],
+            topics: body.filterOptions?.topics?.length ? body.filterOptions.topics : [...topicOptions],
+          });
           setSelectedConfessionId((current) =>
             current && body.confessions.some((item) => item.id === current) ? current : body.confessions[0]?.id ?? "",
           );
@@ -1463,7 +1549,7 @@ export default function Home() {
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [country, search, sort, topic]);
+  }, [country, search, shuffleNonce, sort, topic]);
 
   useEffect(() => {
     if (!showSuccessToast) {
@@ -1479,7 +1565,7 @@ export default function Home() {
       return;
     }
 
-    const timer = window.setTimeout(() => setNewConfessionEntering(false), 1100);
+    const timer = window.setTimeout(() => setNewConfessionEntering(false), 900);
     return () => window.clearTimeout(timer);
   }, [newConfessionEntering]);
 
@@ -1527,6 +1613,7 @@ export default function Home() {
     setScreen("saving");
 
     try {
+      const minLoading = new Promise((resolve) => window.setTimeout(resolve, SAVE_LOADING_MIN_DURATION_MS));
       const response = await fetch(`/api/confessions/draft/${draft.id}/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1538,7 +1625,17 @@ export default function Home() {
       }
 
       const body = (await response.json()) as { confession: Confession };
+      await minLoading;
       setConfessions((items) => [body.confession, ...items.filter((item) => item.id !== body.confession.id)]);
+      setFilterOptions((options) => ({
+        countries: [
+          ...options.countries,
+          ...[body.confession.country, ...body.confession.tags.filter((tag) => !options.topics.includes(tag) && tag !== "אחר")].filter(
+            (value) => value && !options.countries.includes(value),
+          ),
+        ],
+        topics: options.topics.includes(body.confession.topic) ? options.topics : [...options.topics, body.confession.topic],
+      }));
       setNewConfession(body.confession);
       setNewConfessionEntering(true);
       setDraft(undefined);
@@ -1599,6 +1696,16 @@ export default function Home() {
     setCountry("");
     setTopic("");
     setSort("random");
+    setShuffleNonce((value) => value + 1);
+  }
+
+  function handleSortChange(value: SortValue) {
+    if (value === "random") {
+      resetFilters();
+      return;
+    }
+
+    setSort(value);
   }
 
   if (screen === "generating") {
@@ -1690,7 +1797,7 @@ export default function Home() {
       onSearchChange={setSearch}
       onCountryChange={setCountry}
       onTopicChange={setTopic}
-      onSortChange={setSort}
+      onSortChange={handleSortChange}
       onResetFilters={resetFilters}
     />
   );
