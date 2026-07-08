@@ -46,11 +46,13 @@ const images = {
   waterpark: imagePaths.waterpark,
 } as const;
 
-const SPLASH_INTRO_DURATION_MS = 2200;
+const SPLASH_INTRO_DURATION_MS = 3000;
 const REDUCED_MOTION_SPLASH_DURATION_MS = 180;
 const SAVE_LOADING_MIN_DURATION_MS = 8000;
 const DESKTOP_PROMPT_PLACEHOLDER = "לא להתבייש! כתבו על סיטואציה בה הייתם קצת הישראלי המכוער בחול....";
-const MOBILE_PROMPT_PLACEHOLDER = "איפה הייתם קצת ״הישראלי המכוער?";
+const MOBILE_PROMPT_PLACEHOLDER = "״איפה הייתם קצת ״הישראלי המכוער?״";
+const SUITCASE_LOOP_VIDEO = "/videos/לופ מזוודה.mp4";
+const SUITCASE_LOADING_MESSAGES = ["מוסיף את הוידוי שלך...", "חבל, מה לא ניקח?"];
 
 type FilterOptions = {
   countries: string[];
@@ -240,7 +242,7 @@ function FloatingIllustration({
 
   return (
     <div
-      className={`absolute flex aspect-square items-center justify-center transition-transform duration-500 ease-out hover:z-20 hover:scale-110 ${
+      className={`absolute flex aspect-square items-center justify-center transition-all duration-800 ease-out hover:z-20 hover:scale-110 ${
         shrunk ? "scale-[0.86]" : ""
       } ${className}`}
       style={style}
@@ -540,10 +542,7 @@ function Header({
 
 function SendIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 19V5" stroke="#FFFCF8" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M6.25 10.75L12 5L17.75 10.75" stroke="#FFFCF8" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Image src={images.sendArrow} alt="" fill sizes="24px" className="object-contain" />
   );
 }
 
@@ -594,8 +593,8 @@ function HeroContent({
   }, []);
 
   return (
-    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[22px] px-5 lg:fixed lg:left-1/2 lg:top-1/2 lg:mt-0 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-[28px] 2xl:gap-[40px]">
-      <div className="flex w-full flex-col items-center gap-[22px] lg:gap-[28px] 2xl:gap-[40px]">
+    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[34px] px-5 lg:fixed lg:left-1/2 lg:top-1/2 lg:mt-0 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-[44px] 2xl:gap-[64px]">
+      <div className="flex w-full flex-col items-center gap-[10px] lg:gap-[14px] 2xl:gap-[20px]">
         <div className="flex flex-col items-center">
           <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
             <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" />
@@ -614,7 +613,7 @@ function HeroContent({
         <form
           onSubmit={onSubmit}
           id="hero-prompt-form"
-          className={`flex w-full items-center justify-end rounded-[40px] border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(9px,0.75vw,14.5px)] transition-colors ${
+          className={`flex w-full items-center justify-end rounded-[40px] border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(11px,0.85vw,16px)] transition-colors ${
             promptActive
               ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
               : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
@@ -663,7 +662,7 @@ function HeroContent({
               }}
               placeholder={promptActive ? "" : placeholder}
               dir="rtl"
-              className="min-w-0 flex-1 resize-none overflow-hidden bg-transparent py-0 text-right font-sans text-[14px] leading-[1.35] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] 2xl:text-[24px]"
+              className="min-w-0 flex-1 resize-none self-center overflow-hidden bg-transparent py-0 text-right font-sans text-[14px] leading-[1.2] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] lg:leading-[1.2] 2xl:text-[24px]"
             />
             {canSend ? (
               <button
@@ -690,9 +689,42 @@ function HeroContent({
   );
 }
 
-function SplashIntro({ onDone }: { onDone: () => void }) {
+function shuffledIndexes(length: number) {
+  const indexes = Array.from({ length }, (_, index) => index);
+  let seed = length * 2654435761;
+
+  for (let index = indexes.length - 1; index > 0; index -= 1) {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const swapIndex = seed % (index + 1);
+    [indexes[index], indexes[swapIndex]] = [indexes[swapIndex], indexes[index]];
+  }
+
+  return indexes;
+}
+
+function SplashAnimatedCollage({ items }: { items: CollageImage[] }) {
+  const [order] = useState(() => shuffledIndexes(items.length));
+  const delays = order.reduce<number[]>((result, itemIndex, orderIndex) => {
+    result[itemIndex] = 650 + orderIndex * 130;
+    return result;
+  }, []);
+
+  return (
+    <Collage
+      items={items.map((item, index) => ({
+        ...item,
+        className: `splash-sequence-image ${item.className}`,
+        style: {
+          ...item.style,
+          animationDelay: `${delays[index] ?? 650}ms`,
+        },
+      }))}
+    />
+  );
+}
+
+function SplashIntro({ header, onDone }: { header: ReactNode; onDone: () => void }) {
   const [exiting, setExiting] = useState(false);
-  const [videoFailed, setVideoFailed] = useState(false);
   const doneRef = useRef(false);
   const finish = useCallback(() => {
     if (doneRef.current) {
@@ -706,38 +738,33 @@ function SplashIntro({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timer = window.setTimeout(finish, reduceMotion || videoFailed ? REDUCED_MOTION_SPLASH_DURATION_MS : SPLASH_INTRO_DURATION_MS);
+    const timer = window.setTimeout(finish, reduceMotion ? REDUCED_MOTION_SPLASH_DURATION_MS : SPLASH_INTRO_DURATION_MS);
 
     return () => window.clearTimeout(timer);
-  }, [finish, videoFailed]);
+  }, [finish]);
 
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 z-25 flex items-center justify-center bg-[#fffaf0] px-[clamp(20px,6vw,72px)] transition-opacity duration-300 ${
+      className={`pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#fffaf0] transition-opacity duration-300 ${
         exiting ? "opacity-0" : "opacity-100"
       }`}
     >
-      {videoFailed ? (
-        <div
-          data-figma-name="פתיח אתר 4"
-          data-figma-node-id="1406:579"
-          className="splash-intro-panel aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0]"
-        />
-      ) : (
-        <video
-          data-figma-name="פתיח אתר 4"
-          data-figma-node-id="1406:579"
-          className="aspect-1121/631 w-full max-w-[1121px] rounded-[clamp(28px,4vw,58px)] bg-[#fffaf0] object-cover"
-          autoPlay
-          muted
-          playsInline
-          onEnded={finish}
-          onError={() => setVideoFailed(true)}
-        >
-          <source src={images.splashIntroVideo} type="video/mp4" />
-        </video>
-      )}
+      <div className="absolute inset-x-0 bottom-0 top-0 lg:hidden">
+        <SplashAnimatedCollage items={mobileCollage} />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 top-0 hidden lg:block">
+        <SplashAnimatedCollage items={desktopCollage} />
+      </div>
+      <div className="splash-logo-sequence absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+        <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
+          <Image src={images.logo} alt="" fill priority sizes="(min-width: 1536px) 482px, (min-width: 1024px) 273px, 187px" />
+        </div>
+        <p className="font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
+          איי.אל
+        </p>
+      </div>
+      <div className="splash-menu-sequence absolute inset-x-0 top-0 z-30">{header}</div>
     </div>
   );
 }
@@ -925,7 +952,7 @@ function ChutzpahMeter({
       >
         {showValue ? (
           <span
-            className="absolute top-[-4px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
+            className="absolute top-[-8px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
             style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
           >
             {value}%
@@ -993,7 +1020,7 @@ function ConfessionCard({
       className={
         isPreview
           ? "relative z-20 mx-auto mt-[80px] flex w-[342px] flex-col items-center gap-[22px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
-          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-[160px] lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
+          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-[260px] lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
       }
     >
       <article
@@ -1023,7 +1050,7 @@ function ConfessionCard({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-[25px] top-[10px] z-20 flex size-[50px] items-center justify-center text-[38px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
+              className="absolute right-[25px] top-[10px] z-20 flex size-[60px] items-center justify-center text-[46px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
               aria-label="Close"
             >
               ×
@@ -1091,7 +1118,7 @@ function ConfessionCard({
           </div>
           <div className="mt-auto flex w-full flex-col items-end gap-2">
             <span className="hidden w-full text-right font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
-            <div className="flex w-full flex-wrap items-center justify-end gap-2" dir="ltr">
+            <div className="flex w-full flex-wrap items-center justify-end gap-2" dir="rtl">
               {confession.tags.map((tag) => (
                 <TagPill key={tag}>{tag}</TagPill>
               ))}
@@ -1130,28 +1157,42 @@ function ConfessionCard({
 function LoadingImageScreen({ src }: { src: string }) {
   const isCroissants = src === images.loadingCroissants;
   const isSuitcase = src === images.loadingSuitcase;
-  const loadingText = isSuitcase ? "מוסיף את הוידוי שלך" : "מעמיס רגע כמה נתונים";
+  const [suitcaseMessageIndex, setSuitcaseMessageIndex] = useState(0);
+  const loadingText = isSuitcase ? SUITCASE_LOADING_MESSAGES[suitcaseMessageIndex] : "מעמיס רגע כמה נתונים";
+
+  useEffect(() => {
+    if (!isSuitcase) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setSuitcaseMessageIndex((value) => (value + 1) % SUITCASE_LOADING_MESSAGES.length);
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, [isSuitcase]);
+
+  const frameClassName =
+    "absolute left-1/2 top-1/2 z-20 flex h-[min(67dvh,430px)] w-[342px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center bg-[#fefdf8] px-0 py-[35px] text-center drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)] lg:h-[620px] lg:w-[1013px] lg:px-[210px] lg:pb-[42px] lg:pl-[210px] lg:pr-[211px] lg:pt-[35px]";
+  const textClassName = "shrink-0 text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]";
 
   if (isCroissants) {
     return (
       <ScreenCanvas>
         <Backdrop />
-        <div className="absolute left-1/2 top-1/2 z-20 flex h-[67dvh] w-[min(92vw,67vw)] min-w-[342px] max-w-[895px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] bg-[#fefdf8] px-[clamp(24px,8vw,211px)] pb-[42px] pt-[35px] drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)]">
+        <div className={`${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ העמסת מזון" data-figma-node-id="1115:31631">
           <video
-            className="min-h-0 w-full flex-1 object-contain"
-            data-figma-name="לופ העמסת מזון"
-            data-figma-node-id="1115:31631"
+            className="h-[263px] w-[341px] shrink-0 object-contain lg:h-[705px] lg:w-[913px]"
             autoPlay
             loop
             muted
             playsInline
-            poster={images.loadingCroissantsPoster}
             preload="auto"
             aria-hidden="true"
           >
             <source src={images.loadingCroissantsVideo} type="video/mp4" />
           </video>
-          <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
+          <p className={textClassName}>
             {loadingText}
             <span className="loading-dots" aria-hidden="true" />
           </p>
@@ -1163,13 +1204,20 @@ function LoadingImageScreen({ src }: { src: string }) {
   return (
     <ScreenCanvas>
       <Backdrop />
-      <div className="absolute left-1/2 top-1/2 z-20 flex h-[67dvh] w-[min(92vw,67vw)] min-w-[342px] max-w-[895px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] bg-[#fefdf8] px-[clamp(24px,8vw,211px)] pb-[42px] pt-[35px] drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)]">
-        <div className="relative min-h-0 w-full flex-1 overflow-hidden bg-[#fffcf8]">
-          <Image src={src} alt="" fill priority className="object-cover" sizes="596px" />
-        </div>
-        <p className="text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]">
+      <div className={`${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ מזוודה" data-figma-node-id="1179:12877">
+        <video
+          className="h-[296px] w-[312px] shrink-0 object-contain lg:h-[704px] lg:w-[741px]"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        >
+          <source src={SUITCASE_LOOP_VIDEO} type="video/mp4" />
+        </video>
+        <p className={textClassName}>
           {loadingText}
-          <span className="loading-dots" aria-hidden="true" />
         </p>
       </div>
     </ScreenCanvas>
@@ -1257,7 +1305,7 @@ function InstructionsContent() {
         {rows.map(({ icon, text }) => (
           <p
             key={text}
-            className="flex w-full items-center justify-end gap-[16px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:gap-[22px] lg:text-[18px] 2xl:text-[24px]"
+            className="flex w-full items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]"
             dir="ltr"
           >
             <span dir="rtl">{text}</span>
@@ -1420,11 +1468,11 @@ function HomeScreen({
           onSubmit={onSubmit}
           onHelp={onHelp}
         />
-        {showSplashIntro ? <SplashIntro onDone={onSplashIntroDone} /> : null}
         {showSuccess ? <SuccessToast onDismiss={onDismissSuccess} /> : null}
         {hasNoResults ? <EmptyState onReset={onResetFilters} /> : null}
         <ExtraConfessionsGrid confessions={collageConfessions.slice(8)} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
       </main>
+      {showSplashIntro ? <SplashIntro header={renderHeader()} onDone={onSplashIntroDone} /> : null}
     </div>
   );
 }

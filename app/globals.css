@@ -35,6 +35,43 @@ body {
   box-shadow: 0 0 0 1px rgba(255, 250, 240, 0.9);
 }
 
+.splash-logo-sequence {
+  opacity: 0;
+  animation: splashFadeIn 600ms ease-out 100ms forwards;
+}
+
+.splash-sequence-image {
+  opacity: 0;
+  animation: splashImageIn 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.splash-menu-sequence {
+  opacity: 0;
+  animation: splashFadeIn 400ms ease-out 2400ms forwards;
+}
+
+@keyframes splashFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splashImageIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes passportIn {
   0% {
     opacity: 0;
@@ -77,7 +114,7 @@ body {
 }
 
 .gallery-reflow {
-  animation: galleryReflow 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: galleryReflow 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -191,6 +228,13 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .splash-logo-sequence,
+  .splash-sequence-image,
+  .splash-menu-sequence {
+    animation-duration: 1ms;
+    animation-delay: 0ms !important;
+  }
+
   .splash-intro,
   .splash-intro-panel {
     animation-duration: 180ms;
