@@ -1106,7 +1106,7 @@ function ConfessionCard({
                 <p className="ch-confession-card__date w-full text-right text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
               </div>
             </div>
-            <p className="ch-confession-card__body w-full text-right text-[14px] leading-[1.296] text-[#2b2b2b] lg:max-w-[214px] lg:text-[18px] 2xl:max-w-[286px] 2xl:text-[24px]">{confession.content}</p>
+            <p className="ch-confession-card__body ml-auto mr-0 w-full text-right text-[14px] leading-[1.296] text-[#2b2b2b] lg:max-w-[214px] lg:text-[18px] 2xl:max-w-[286px] 2xl:text-[24px]">{confession.content}</p>
             {!isPreview ? (
               <p className="ch-confession-card__average-score w-full text-right text-[14px] lg:text-[18px] 2xl:text-[24px]">
                 <span className="ch-confession-card__average-score-label text-[#998e8a]">דירוג חוצפמטר ממוצע:</span>{" "}
