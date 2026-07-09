@@ -5,6 +5,7 @@ import path from "path";
 import { saveImage } from "./images";
 
 type GeneratedConfession = {
+  sourcePrompt: string;
   title: string;
   content: string;
   country: string;
@@ -25,6 +26,13 @@ type AiValidationResponse =
       valid: false;
       error: string;
     };
+
+type ImageFaithfulnessResponse = {
+  matches?: boolean;
+  reason?: string;
+  missing?: string[];
+  unrelated?: string[];
+};
 
 const STYLE_REFERENCE_DIR_CANDIDATES = [
   process.env.AI_STYLE_REFERENCE_DIR,
@@ -48,6 +56,13 @@ export class PromptValidationError extends Error {
   }
 }
 
+class ImagePromptMismatchError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ImagePromptMismatchError";
+  }
+}
+
 function getOpenAI() {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is missing");
@@ -68,18 +83,22 @@ function normalizeTags(tags: unknown) {
     .slice(0, 3);
 }
 
-function parseAiJson(content: string): AiValidationResponse {
+function parseJsonObject<T>(content: string, errorMessage: string): T {
   try {
-    return JSON.parse(content) as AiValidationResponse;
+    return JSON.parse(content) as T;
   } catch {
     const match = content.match(/\{[\s\S]*\}/);
 
     if (!match) {
-      throw new Error("OpenAI did not return valid JSON");
+      throw new Error(errorMessage);
     }
 
-    return JSON.parse(match[0]) as AiValidationResponse;
+    return JSON.parse(match[0]) as T;
   }
+}
+
+function parseAiJson(content: string): AiValidationResponse {
+  return parseJsonObject<AiValidationResponse>(content, "OpenAI did not return valid JSON");
 }
 
 function normalizeValidationError(error: string | undefined) {
@@ -118,12 +137,13 @@ function fallbackConfession(prompt: string): GeneratedConfession {
   const isAnimalStory = /פיל|פילים|חיה|חיות|קוף|כלב|חתול/.test(prompt);
   const hasAggression = /הרבצ|ירק|בעט|דחפ|מכה|הכיתי/.test(prompt);
   const topic = isAnimalStory || hasAggression ? "התנהגות לא ראויה" : "חוויות טיול";
-  const title = isAnimalStory ? "הפיל והמטאטא" : "רגע לא להתגאות בו";
+  const title = /חתול/.test(prompt) ? "החתול שעל השולחן" : isAnimalStory ? "רגע עם חיה שלא להתגאות בו" : "רגע לא להתגאות בו";
   const tags = [country !== "אחר" ? country : undefined, isAnimalStory ? "חיות" : "חוצפה", "וידוי"].filter(
     (tag): tag is string => Boolean(tag),
   );
 
   return {
+    sourcePrompt: prompt,
     title,
     content: prompt,
     country,
@@ -182,6 +202,7 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
   }
 
   return {
+    sourcePrompt: trimmedPrompt,
     title: parsed.title?.trim() || "וידוי חדש",
     content: parsed.content?.trim() || trimmedPrompt,
     country: parsed.country?.trim() || "אחר",
@@ -191,8 +212,12 @@ export async function generateConfessionFromPrompt(prompt: string): Promise<Gene
 }
 
 function safeVisualStory(confession: GeneratedConfession) {
-  const text = `${confession.title} ${confession.content} ${confession.tags.join(" ")}`;
+  const text = `${confession.sourcePrompt} ${confession.title} ${confession.content} ${confession.tags.join(" ")}`;
   const location = confession.country === "אחר" ? "an overseas travel destination" : confession.country;
+
+  if (/חתול/.test(text) && /שולחן/.test(text) && /העיף|זרק|דחפ|בעט|הוריד|סילק/.test(text)) {
+    return `A tourist at a cafe or dining table in ${location} awkwardly shooes a visible cat away from the tabletop. The cat is unharmed and startled, the table is clearly visible, and nearby people react with embarrassed surprise.`;
+  }
 
   if (/פיל|פילים|חיה|חיות/.test(text) && /הרבצ|בעט|מכה|הכיתי|מטאטא/.test(text)) {
     return `A tourist at an elephant washing activity in ${location} stands awkwardly with a broom lowered, looking sheepish. A calm elephant and a local guide look surprised from a comfortable distance.`;
@@ -209,7 +234,7 @@ function safeVisualStory(confession: GeneratedConfession) {
   return `A playful travel scene in ${location} about ${confession.topic}, shown as a light social misunderstanding with expressive body language and clear local context.`;
 }
 
-function imagePrompt(confession: GeneratedConfession, variant: number, safest = false) {
+function imagePrompt(confession: GeneratedConfession, variant: number, safest = false, strict = false) {
   return [
     "Create a square image for a humorous Israeli travel anecdote.",
     "The background must always look like a realistic travel photograph with natural lighting, real-world depth, and recognizable location details.",
@@ -217,11 +242,20 @@ function imagePrompt(confession: GeneratedConfession, variant: number, safest = 
     "Use the attached images only as references for the illustrated characters: match their palette, expressive treatment, and playful editorial-cartoon energy. Do not copy their exact scenes, characters, text, or layouts.",
     "Style: photorealistic environment, illustrated characters, saturated blues/reds/yellows, no text, no captions, no logos.",
     "Keep the scene friendly, symbolic, and suitable for a lighthearted public gallery.",
+    "The scene must stay faithful to the user's concrete story. Preserve the main objects, animals, people, action, and setting from the original prompt. Do not replace them with an unrelated travel scene.",
+    strict
+      ? "Strict retry: make the user's exact core event visually obvious at first glance. Avoid generic transport, landmarks, or vacation imagery unless the user mentioned them."
+      : "",
     `Variant: ${variant === 1 ? "wide scene with clear location context" : "closer character-focused scene with a different composition"}.`,
+    `Original user prompt: ${confession.sourcePrompt}`,
+    `Generated confession: ${confession.content}`,
     `Country/location: ${confession.country}`,
-    safest ? "Visual scene brief: A tourist has a funny etiquette misunderstanding near local transportation or a recognizable travel setting. Everyone is expressive, safe, and cartoonishly surprised." : `Topic: ${confession.topic}`,
-    safest ? "Use only friendly expressions, open poses, clear travel context, and simple visual humor." : `Visual scene brief: ${safeVisualStory(confession)}`,
-  ].join("\n");
+    `Topic: ${confession.topic}`,
+    safest ? "Render the scene as a non-graphic, symbolic version of the same event with friendly expressions and no visible harm." : "",
+    `Visual scene brief: ${safeVisualStory(confession)}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 async function readStyleReferenceImagePaths(directory: string) {
@@ -283,17 +317,74 @@ function isImageSafetyRejection(error: unknown) {
   return /safety system|safety_violations|rejected by the safety/i.test(message);
 }
 
+function isImagePromptMismatch(error: unknown) {
+  return error instanceof ImagePromptMismatchError;
+}
+
+async function assertImageMatchesPrompt(client: OpenAI, confession: GeneratedConfession, b64Json: string) {
+  const completion = await client.chat.completions.create({
+    model: process.env.OPENAI_IMAGE_VALIDATION_MODEL ?? "gpt-4o-mini",
+    response_format: { type: "json_object" },
+    temperature: 0,
+    messages: [
+      {
+        role: "system",
+        content: [
+          "You are a strict visual QA reviewer for generated images.",
+          "Return only JSON with this shape: {\"matches\":boolean,\"reason\":\"short reason\",\"missing\":[\"important missing prompt details\"],\"unrelated\":[\"unrelated image details\"]}.",
+          "Approve only if the image clearly represents the original user prompt or a safe symbolic version of it.",
+          "Reject if the main object, animal, action, or setting from the prompt is missing, or if the image shows an unrelated travel scene.",
+          "If the prompt includes harmful or rude behavior, a non-graphic symbolic depiction is acceptable only when the same entities and action context remain visible.",
+        ].join(" "),
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: [
+              "Does this generated image match the requested story?",
+              `Original user prompt: ${confession.sourcePrompt}`,
+              `Generated confession: ${confession.content}`,
+              `Expected visual scene: ${safeVisualStory(confession)}`,
+            ].join("\n"),
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/png;base64,${b64Json}`,
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  const content = completion.choices[0]?.message.content;
+
+  if (!content) {
+    throw new Error("OpenAI did not return image validation content");
+  }
+
+  const review = parseJsonObject<ImageFaithfulnessResponse>(content, "OpenAI did not return valid image validation JSON");
+
+  if (review.matches !== true) {
+    throw new ImagePromptMismatchError(review.reason?.trim() || "Generated image did not match the prompt");
+  }
+}
+
 async function generateImageWithReferences(
   client: OpenAI,
   referenceImages: File[],
   confession: GeneratedConfession,
   variant: number,
   safest = false,
+  strict = false,
 ) {
   const image = await client.images.edit({
     model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-2",
     image: referenceImages,
-    prompt: imagePrompt(confession, variant, safest),
+    prompt: imagePrompt(confession, variant, safest, strict),
     n: 1,
     size: "1024x1024",
     quality: "low",
@@ -306,7 +397,37 @@ async function generateImageWithReferences(
     throw new Error("OpenAI did not return generated image data");
   }
 
+  await assertImageMatchesPrompt(client, confession, b64Json);
+
   return uploadImage(b64Json);
+}
+
+async function generateValidatedImageOption(
+  client: OpenAI,
+  referenceImages: File[],
+  confession: GeneratedConfession,
+  variant: number,
+) {
+  const attempts = [
+    { safest: false, strict: false },
+    { safest: false, strict: true },
+    { safest: true, strict: true },
+  ];
+  let lastRetryableError: unknown;
+
+  for (const attempt of attempts) {
+    try {
+      return await generateImageWithReferences(client, referenceImages, confession, variant, attempt.safest, attempt.strict);
+    } catch (error) {
+      if (!isImageSafetyRejection(error) && !isImagePromptMismatch(error)) {
+        throw error;
+      }
+
+      lastRetryableError = error;
+    }
+  }
+
+  throw lastRetryableError;
 }
 
 export async function generateImageOptions(confession: GeneratedConfession) {
@@ -316,15 +437,7 @@ export async function generateImageOptions(confession: GeneratedConfession) {
 
   return Promise.all(
     [1, 2].map(async (variant) => {
-      try {
-        return await generateImageWithReferences(client, referenceImages, confession, variant);
-      } catch (error) {
-        if (!isImageSafetyRejection(error)) {
-          throw error;
-        }
-
-        return generateImageWithReferences(client, referenceImages, confession, variant, true);
-      }
+      return generateValidatedImageOption(client, referenceImages, confession, variant);
     }),
   );
 }
