@@ -935,10 +935,7 @@ function ChutzpahMeter({
   onRatingChange?: (value: number) => void;
   onRatingCommit?: (value: number) => void;
 }) {
-  const [hovering, setHovering] = useState(false);
-  const [dragging, setDragging] = useState(false);
   const value = Math.max(0, Math.min(100, rating));
-  const showValue = hovering || dragging;
 
   return (
     <div className="ch-meter flex w-[296px] flex-col items-end justify-center gap-2 lg:w-auto lg:flex-row lg:items-end lg:gap-[22.336px]" dir="ltr">
@@ -948,18 +945,14 @@ function ChutzpahMeter({
       </p>
       <div
         dir="ltr"
-        className="ch-meter__track chutzpah-meter order-2 relative h-[52px] w-full max-w-[470px] lg:order-1 lg:h-[63px] 2xl:h-[68px] 2xl:max-w-[640px]"
-        onPointerEnter={() => setHovering(true)}
-        onPointerLeave={() => setHovering(false)}
+        className="ch-meter__track chutzpah-meter order-2 relative h-[52px] w-[296px] max-w-full lg:order-1 lg:h-[63px] lg:w-[470px] 2xl:h-[68px] 2xl:w-[640px]"
       >
-        {showValue ? (
-          <span
-            className="ch-meter__value-tooltip absolute top-[-8px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
-            style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
-          >
-            {value}%
-          </span>
-        ) : null}
+        <span
+          className="ch-meter__value-tooltip absolute top-[-8px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
+          style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
+        >
+          {value}%
+        </span>
         <div className="ch-meter__bar absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] lg:top-[39px] 2xl:top-[40px] 2xl:h-[27px]">
           <div className="ch-meter__fill h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
         </div>
@@ -970,9 +963,7 @@ function ChutzpahMeter({
           step={10}
           value={value}
           dir="ltr"
-          onPointerDown={() => setDragging(true)}
           onPointerUp={(event) => {
-            setDragging(false);
             onRatingCommit?.(Number(event.currentTarget.value));
           }}
           onChange={(event) => onRatingChange?.(Number(event.target.value))}
