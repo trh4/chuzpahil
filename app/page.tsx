@@ -81,15 +81,17 @@ const extraCollagePositions = [
   { className: "left-[56%] top-[68%] w-[84.1vw] lg:left-[4%] lg:top-[67%] lg:w-[31.9vw] 2xl:w-[31.9vw]", rotate: "rotate-[14deg]" },
 ];
 
-// Positions are percentages of the page, sizes are relative to the viewport
-// width, so the collage scales continuously with any screen size.
-// Mobile layout matches Figma frame 1334:719 (390x844).
+// Positions are percentages of the collage canvas (~170dvh tall on the home
+// screen, so the collage overflows the first viewport and continues as the
+// user scrolls), sizes are relative to the viewport width. Images alternate
+// between the left and right edges with generous vertical spacing and only a
+// slight overlap, keeping the fixed center content clear.
 const mobileCollage: CollageImage[] = [
   {
     src: images.cafe,
     alt: "Illustration of travelers at a cafe",
     confessionId: "souvenir-mugs",
-    className: "left-[-15.2%] top-[3.2%] w-[68.5vw]",
+    className: "left-[-20%] top-[1%] w-[55vw]",
     rotate: "-rotate-[16.43deg]",
     priority: true,
   },
@@ -97,7 +99,7 @@ const mobileCollage: CollageImage[] = [
     src: images.waterpark,
     alt: "Illustration of a water park scene",
     confessionId: "bracelet",
-    className: "left-[59.7%] top-[3%] w-[67.4vw]",
+    className: "left-[62%] top-[10%] w-[55vw]",
     rotate: "rotate-[20.07deg]",
     priority: true,
   },
@@ -105,69 +107,60 @@ const mobileCollage: CollageImage[] = [
     src: images.hostel,
     alt: "Illustration of a masked tourist",
     confessionId: "train",
-    className: "left-[-14.6%] top-[26.7%] w-[38.5vw]",
+    className: "left-[-10%] top-[22%] w-[42vw]",
     rotate: "-rotate-[31.18deg]",
   },
   {
     src: images.flipflops,
     alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[72.3%] top-[29.6%] w-[41vw]",
+    className: "left-[66%] top-[31%] w-[42vw]",
     rotate: "-rotate-[17.95deg]",
   },
   {
     src: images.dorm,
     alt: "Illustration of travelers sleeping in a shared room",
     confessionId: "budget-room",
-    className: "left-[-25.6%] top-[45.4%] w-[54.9vw]",
+    className: "left-[-20%] top-[42%] w-[55vw]",
     rotate: "-rotate-[12.83deg]",
   },
   {
     src: images.beach,
     alt: "Illustration of tourists on a beach",
     confessionId: "honeymoon",
-    className: "left-[60%] top-[56.2%] w-[91.4vw]",
+    className: "left-[60%] top-[52%] w-[62vw]",
     rotate: "rotate-[13.47deg]",
   },
   {
     src: images.marathon,
     alt: "Illustration of a runner abroad",
     confessionId: "marathon",
-    className: "left-[-37.2%] top-[63.9%] w-[84.1vw]",
+    className: "left-[-24%] top-[64%] w-[58vw]",
     rotate: "rotate-[21.36deg]",
   },
   {
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[2%] top-[84.1%] w-[44.4vw]",
+    className: "left-[62%] top-[77%] w-[45vw]",
     rotate: "-rotate-[20.55deg]",
   },
 ];
 
-// Laptop (lg) layout matches Figma frame 1118:38187 (1280x832),
-// wide desktop (2xl) matches Figma frame 1357:2020 (1920x1080).
 const desktopCollage: CollageImage[] = [
   {
     src: images.cafe,
     alt: "Illustration of travelers at a cafe",
     confessionId: "souvenir-mugs",
-    className: "left-[4.8%] top-[-0.5%] w-[36.3vw] 2xl:left-[9.1%] 2xl:top-[-0.7%] 2xl:w-[30vw]",
+    className: "left-[4%] top-[1%] w-[32vw] 2xl:left-[8%] 2xl:w-[27vw]",
     rotate: "rotate-[11.58deg]",
     priority: true,
-  },
-  {
-    src: images.flipflops,
-    alt: "Illustration of a traveler on red hoverboards",
-    confessionId: "honeymoon",
-    className: "left-[63%] top-[5.2%] w-[21.8vw] 2xl:left-[65%] 2xl:top-[10.1%] 2xl:w-[17.4vw]",
-    rotate: "rotate-[25.36deg]",
   },
   {
     src: images.waterpark,
     alt: "Illustration of a water park scene",
     confessionId: "bracelet",
-    className: "left-[65.7%] top-[-7.5%] w-[37.1vw] 2xl:left-[68.4%] 2xl:top-[-1.6%] 2xl:w-[29.6vw]",
+    className: "left-[66%] top-[4%] w-[31vw] 2xl:left-[69%] 2xl:w-[26vw]",
     rotate: "-rotate-[9.89deg]",
     priority: true,
   },
@@ -175,36 +168,43 @@ const desktopCollage: CollageImage[] = [
     src: images.hostel,
     alt: "Illustration of a masked tourist",
     confessionId: "train",
-    className: "left-[-7.7%] top-[15.3%] w-[22.6vw] 2xl:left-[-1.3%] 2xl:top-[14.4%] 2xl:w-[18.7vw]",
+    className: "left-[-4%] top-[23%] w-[21vw] 2xl:left-[0%] 2xl:w-[18vw]",
     rotate: "-rotate-[19.05deg]",
   },
   {
-    src: images.marathon,
-    alt: "Illustration of a runner abroad",
-    confessionId: "marathon",
-    className: "left-[82.5%] top-[72.7%] w-[22.2vw] 2xl:left-[84.3%] 2xl:top-[77.4%] 2xl:w-[17.7vw]",
-    rotate: "-rotate-[15deg]",
-  },
-  {
-    src: images.beach,
-    alt: "Illustration of tourists on a beach",
+    src: images.flipflops,
+    alt: "Illustration of a traveler on red hoverboards",
     confessionId: "honeymoon",
-    className: "left-[64.4%] top-[52.8%] w-[33.1vw] 2xl:left-[62.5%] 2xl:top-[54.4%] 2xl:w-[31.9vw]",
-    rotate: "rotate-[13.47deg]",
+    className: "left-[72%] top-[27%] w-[20vw] 2xl:left-[74%] 2xl:w-[17vw]",
+    rotate: "rotate-[25.36deg]",
   },
   {
     src: images.dorm,
     alt: "Illustration of travelers sleeping in a shared room",
     confessionId: "budget-room",
-    className: "left-[-1.9%] top-[55.4%] w-[36.7vw] 2xl:left-[2.8%] 2xl:top-[51.4%] 2xl:w-[33.5vw]",
+    className: "left-[1%] top-[45%] w-[30vw] 2xl:left-[3%] 2xl:w-[27vw]",
     rotate: "-rotate-[15deg] 2xl:-rotate-[13.94deg]",
+  },
+  {
+    src: images.beach,
+    alt: "Illustration of tourists on a beach",
+    confessionId: "honeymoon",
+    className: "left-[64%] top-[50%] w-[29vw] 2xl:left-[63%] 2xl:w-[26vw]",
+    rotate: "rotate-[13.47deg]",
   },
   {
     src: images.tour,
     alt: "Illustration of a tour group",
     confessionId: "gozleme",
-    className: "left-[60%] top-[74.3%] w-[22.2vw] 2xl:left-[62%] 2xl:top-[76.9%] 2xl:w-[20.9vw]",
+    className: "left-[5%] top-[68%] w-[21vw] 2xl:left-[7%] 2xl:w-[18vw]",
     rotate: "rotate-[8.85deg]",
+  },
+  {
+    src: images.marathon,
+    alt: "Illustration of a runner abroad",
+    confessionId: "marathon",
+    className: "left-[76%] top-[73%] w-[21vw] 2xl:left-[79%] 2xl:w-[17vw]",
+    rotate: "-rotate-[15deg]",
   },
 ];
 
@@ -227,7 +227,7 @@ function FloatingIllustration({
 }) {
   const content = (
     <div
-      className={`relative aspect-square w-[81%] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)] ${rotate} ${faded ? "opacity-50" : ""}`}
+      className={`ch-collage-item__frame relative aspect-square w-[81%] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)] ${rotate} ${faded ? "opacity-50" : ""}`}
     >
       <Image
         src={src}
@@ -235,24 +235,24 @@ function FloatingIllustration({
         fill
         priority={priority}
         sizes="(min-width: 1024px) 35vw, 90vw"
-        className="object-cover"
+        className="ch-collage-item__image object-cover"
       />
     </div>
   );
 
   return (
     <div
-      className={`absolute flex aspect-square items-center justify-center transition-all duration-800 ease-out hover:z-20 hover:scale-110 ${
+      className={`ch-collage-item absolute flex aspect-square items-center justify-center transition-all duration-800 ease-out hover:z-20 hover:scale-110 ${
         shrunk ? "scale-[0.86]" : ""
       } ${className}`}
       style={style}
     >
       <div
-        className="flex size-full items-center justify-center transition-transform duration-300 ease-out will-change-transform"
+        className="ch-collage-item__spin flex size-full items-center justify-center transition-transform duration-300 ease-out will-change-transform"
         style={{ transform: `rotate(${spin}deg)` }}
       >
         {onClick ? (
-          <button type="button" onClick={onClick} className="flex size-full cursor-pointer items-center justify-center">
+          <button type="button" onClick={onClick} className="ch-collage-item__button flex size-full cursor-pointer items-center justify-center">
             {content}
           </button>
         ) : (
@@ -325,10 +325,10 @@ function CustomDropdown<Value extends string>({
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div ref={rootRef} className="ch-dropdown relative shrink-0">
       <button
         type="button"
-        className={triggerClassName}
+        className={`ch-dropdown__trigger ${triggerClassName}`}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -337,21 +337,21 @@ function CustomDropdown<Value extends string>({
         {renderTrigger ? renderTrigger(selectedLabel, open) : selectedLabel}
       </button>
       {open ? (
-        <div role="listbox" aria-label={ariaLabel} className={panelClassName} dir="rtl">
+        <div role="listbox" aria-label={ariaLabel} className={`ch-dropdown__panel ${panelClassName}`} dir="rtl">
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
               role="option"
               aria-selected={option.value === value}
-              className={optionClassName}
+              className={`ch-dropdown__option ${optionClassName}`}
               dir="rtl"
               onClick={() => {
                 onChange(option.value);
                 setOpen(false);
               }}
             >
-              <span className="block w-full text-right">{option.label}</span>
+              <span className="ch-dropdown__option-label block w-full text-right">{option.label}</span>
             </button>
           ))}
         </div>
@@ -427,22 +427,22 @@ function Header({
 
   return (
     <header
-      className="relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-visible border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
+      className="ch-header relative z-30 flex h-[clamp(50px,6.5vw,83px)] w-full items-center justify-between overflow-visible border-b border-[#eae5e3] bg-[#fffaf0] px-[clamp(18px,7.2vw,92px)] py-[clamp(10px,1.1vw,13px)]"
       dir="ltr"
     >
-      <div className={`flex min-w-0 items-center gap-[10px] ${mobileSearchOpen ? "flex-1" : ""} lg:flex-none`}>
+      <div className={`ch-header__search-area flex min-w-0 items-center gap-[10px] ${mobileSearchOpen ? "flex-1" : ""} lg:flex-none`}>
         {mobileSearchOpen ? (
           <button
             type="button"
             onClick={closeMobileSearch}
             aria-label="Close search"
-            className="flex size-[24px] shrink-0 items-center justify-center text-[20px] leading-none text-[#2b2b2b] lg:hidden"
+            className="ch-header__search-close-btn flex size-[24px] shrink-0 items-center justify-center text-[20px] leading-none text-[#2b2b2b] lg:hidden"
           >
             ✕
           </button>
         ) : null}
         <label
-          className={`flex min-w-0 items-center rounded-full transition-colors ${
+          className={`ch-header__search-label flex min-w-0 items-center rounded-full transition-colors ${
             mobileSearchOpen
               ? "flex-1 justify-between border border-[blue] px-[10px] py-[2px]"
               : "justify-center p-[6px]"
@@ -455,7 +455,7 @@ function Header({
             }
           }}
         >
-          <span className="relative h-[12px] w-[10px] shrink-0 lg:h-[clamp(18px,1.15vw,22px)] lg:w-[clamp(15px,1vw,19px)]">
+          <span className="ch-header__search-icon relative h-[12px] w-[10px] shrink-0 lg:h-[clamp(18px,1.15vw,22px)] lg:w-[clamp(15px,1vw,19px)]">
             <Image
               src={searchActive ? images.searchMobileBlue : images.searchMobile}
               alt=""
@@ -484,41 +484,41 @@ function Header({
             }}
             placeholder={searchActive ? "" : "חיפוש חופשי"}
             dir="rtl"
-            className={`${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
+            className={`ch-header__search-input ${mobileSearchOpen ? "block text-[12px]" : "hidden"} min-w-0 flex-1 bg-transparent text-right font-sans text-[#745447] placeholder:text-[#745447] focus:outline-none lg:block lg:text-[18px] 2xl:text-[24px]`}
           />
         </label>
       </div>
 
-      <nav className={`${mobileSearchOpen ? "hidden" : "flex"} min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)] lg:flex`} dir="rtl">
+      <nav className={`ch-header__nav ${mobileSearchOpen ? "hidden" : "flex"} min-w-0 items-center justify-end gap-[clamp(18px,4.9vw,63px)] lg:flex`} dir="rtl">
         <CustomDropdown
           value={sort}
           ariaLabel="Sort confessions"
           options={sortOptions}
           onChange={onSortChange}
-          triggerClassName="flex shrink-0 items-center justify-center gap-1 bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:gap-[6px] lg:text-[16px] 2xl:gap-2 2xl:text-[24px]"
+          triggerClassName="ch-header__sort flex shrink-0 items-center justify-center gap-1 bg-transparent font-sans text-[14px] text-[#0013be] focus:outline-none lg:gap-[6px] lg:text-[16px] 2xl:gap-2 2xl:text-[24px]"
           panelClassName={dropdownPanelClass}
           optionClassName={dropdownOptionClass}
           renderTrigger={(label) => (
             <>
-              <span>{label}</span>
-              <span className="relative h-2 w-1 -rotate-90 lg:h-[11px] lg:w-[6px] 2xl:h-[14.6px] 2xl:w-[8.6px]">
+              <span className="ch-header__sort-label">{label}</span>
+              <span className="ch-header__sort-arrow relative h-2 w-1 -rotate-90 lg:h-[11px] lg:w-[6px] 2xl:h-[14.6px] 2xl:w-[8.6px]">
                 <Image src={images.arrow} alt="" fill sizes="15px" />
               </span>
             </>
           )}
         />
 
-        <div className="flex min-w-0 items-center gap-[5px]">
-          <span className="relative size-[14px] shrink-0 lg:size-[clamp(16px,1.3vw,24.873px)]">
+        <div className="ch-header__filters flex min-w-0 items-center gap-[5px]">
+          <span className="ch-header__filter-icon relative size-[14px] shrink-0 lg:size-[clamp(16px,1.3vw,24.873px)]">
             <Image src={images.discoverTune} alt="" fill sizes="25px" />
           </span>
-          <div className="flex items-center gap-1.5 lg:gap-[clamp(10px,0.75vw,14px)]">
+          <div className="ch-header__filter-group flex items-center gap-1.5 lg:gap-[clamp(10px,0.75vw,14px)]">
             <CustomDropdown
               value={country}
               ariaLabel="Filter by country"
               options={countryDropdownOptions}
               onChange={onCountryChange}
-              triggerClassName={filterClass(Boolean(country))}
+              triggerClassName={`ch-header__country-filter ${filterClass(Boolean(country))}`}
               panelClassName={`${dropdownPanelClass} overflow-hidden rounded-[10px]`}
               optionClassName={dropdownOptionClass}
               renderTrigger={(label) => <span className="w-full text-center">{country ? label : "מדינה"}</span>}
@@ -528,7 +528,7 @@ function Header({
               ariaLabel="Filter by topic"
               options={topicDropdownOptions}
               onChange={onTopicChange}
-              triggerClassName={filterClass(Boolean(topic))}
+              triggerClassName={`ch-header__topic-filter ${filterClass(Boolean(topic))}`}
               panelClassName={`${dropdownPanelClass} overflow-hidden rounded-[10px]`}
               optionClassName={dropdownOptionClass}
               renderTrigger={(label) => <span className="w-full text-center">{topic ? label : "נושא"}</span>}
@@ -542,7 +542,7 @@ function Header({
 
 function SendIcon() {
   return (
-    <Image src={images.sendArrow} alt="" fill sizes="24px" className="object-contain" />
+    <Image src={images.sendArrow} alt="" fill sizes="24px" className="ch-send-icon object-contain" />
   );
 }
 
@@ -593,44 +593,44 @@ function HeroContent({
   }, []);
 
   return (
-    <section className="sticky top-[185px] z-20 mx-auto mt-[270px] flex w-full max-w-[1046px] flex-col items-center gap-[34px] px-5 lg:fixed lg:left-1/2 lg:top-1/2 lg:mt-0 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:gap-[44px] 2xl:gap-[64px]">
-      <div className="flex w-full flex-col items-center gap-[10px] lg:gap-[14px] 2xl:gap-[20px]">
-        <div className="flex flex-col items-center">
-          <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
-            <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" />
+    <section className="ch-hero fixed left-1/2 top-1/2 z-20 flex w-full max-w-[1046px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[34px] px-5 lg:gap-[44px] 2xl:gap-[64px]">
+      <div className="ch-hero__branding flex w-full flex-col items-center gap-[10px] lg:gap-[14px] 2xl:gap-[20px]">
+        <div className="ch-hero__logo-group flex flex-col items-center">
+          <div className="ch-hero__logo-wrap relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
+            <Image src={images.logo} alt="Chutzpah" fill priority sizes="(min-width: 1024px) 482px, 190px" className="ch-hero__logo" />
           </div>
-          <p className="font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
+          <p className="ch-hero__subtitle font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
             איי.אל
           </p>
         </div>
 
-        <p className="max-w-[195px] text-center text-[14px] leading-[1.16] text-[#2b2b2b] lg:max-w-[323px] lg:text-[20px] 2xl:max-w-[1046px] 2xl:text-[24px]">
+        <p className="ch-hero__tagline max-w-[195px] text-center text-[14px] leading-[1.16] text-[#2b2b2b] lg:max-w-[323px] lg:text-[20px] 2xl:max-w-[1046px] 2xl:text-[24px]">
           ווידויים של ישראלים בחו״ל שהם רמה גבוהה של רמה נמוכה
         </p>
       </div>
 
-      <div className="relative flex w-full max-w-[min(92vw,1046px)] flex-col items-center">
+      <div className="ch-hero__prompt-area relative flex w-full max-w-[min(92vw,1046px)] flex-col items-center">
         <form
           onSubmit={onSubmit}
           id="hero-prompt-form"
-          className={`flex w-full items-center justify-end rounded-[40px] border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(11px,0.85vw,16px)] transition-colors ${
+          className={`ch-hero__prompt-form flex w-full items-center justify-end rounded-[40px] border-2 bg-[#fffcf8] px-[clamp(16px,2vw,40px)] py-[clamp(11px,0.85vw,16px)] transition-colors ${
             promptActive
               ? "border-[#2b2b2b] shadow-[6px_4px_10.2px_0px_rgba(0,0,0,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
               : "border-[blue] shadow-[6px_4px_10.2px_0px_rgba(0,0,255,0.25),70px_15px_43px_0px_rgba(0,0,0,0.05),31px_7px_32px_0px_rgba(0,0,0,0.09),8px_2px_17px_0px_rgba(0,0,0,0.1)]"
           }`}
         >
-          <span className="flex w-full items-center justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
-            <div className="group relative flex shrink-0 items-center">
+          <span className="ch-hero__prompt-row flex w-full items-center justify-end gap-[7px] lg:gap-[19.52px] 2xl:gap-[26px]" dir="rtl">
+            <div className="ch-hero__help-group group relative flex shrink-0 items-center">
               <button
                 type="button"
                 onClick={onHelp}
-                className={`relative flex size-[30px] items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
+                className={`ch-hero__help-btn relative flex size-[30px] items-center justify-center rounded-[6.563px] p-[2.813px] transition-colors hover:bg-[#d1e2ff] lg:size-[42px] lg:p-[3.938px] 2xl:size-[53px] ${
                   isHelpOpen ? "bg-[#d1e2ff]" : ""
                 }`}
                 aria-label="Prompt writing instructions"
                 aria-pressed={isHelpOpen}
               >
-                <span className="relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
+                <span className="ch-hero__help-icon relative size-[24.375px] lg:size-[34.125px] 2xl:size-[44.817px]">
                   <Image
                     src={images.menuBook}
                     alt=""
@@ -640,7 +640,7 @@ function HeroContent({
                   />
                 </span>
               </button>
-              <span className="prompt-tooltip pointer-events-none absolute bottom-[calc(100%+8px)] right-0 hidden whitespace-nowrap rounded-[8px] px-[10px] py-[5px] text-[12px] leading-none opacity-0 transition-opacity group-hover:block group-hover:opacity-100 lg:text-[14px]">
+              <span className="ch-hero__help-tooltip prompt-tooltip pointer-events-none absolute bottom-[calc(100%+8px)] right-0 hidden whitespace-nowrap rounded-[8px] px-[10px] py-[5px] text-[12px] leading-none opacity-0 transition-opacity group-hover:block group-hover:opacity-100 lg:text-[14px]">
                 הוראות
               </span>
             </div>
@@ -662,15 +662,15 @@ function HeroContent({
               }}
               placeholder={promptActive ? "" : placeholder}
               dir="rtl"
-              className="min-w-0 flex-1 resize-none self-center overflow-hidden bg-transparent py-0 text-right font-sans text-[14px] leading-[1.2] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] lg:leading-[1.2] 2xl:text-[24px]"
+              className="ch-hero__prompt-textarea min-w-0 flex-1 resize-none self-center overflow-hidden bg-transparent py-0 text-right font-sans text-[14px] leading-[1.2] text-[#2b2b2b] placeholder:text-[#998e8a] focus:outline-none lg:text-[20px] lg:leading-[1.2] 2xl:text-[24px]"
             />
             {canSend ? (
               <button
                 type="submit"
                 aria-label="שליחה"
-                className="relative flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[blue] p-[6px] transition-colors hover:bg-[#0010a8] lg:size-[42px] lg:p-[9px] 2xl:size-[53px] 2xl:p-[12px]"
+                className="ch-hero__submit-btn relative flex size-[30px] shrink-0 items-center justify-center rounded-full bg-[blue] p-[6px] transition-colors hover:bg-[#0010a8] lg:size-[42px] lg:p-[9px] 2xl:size-[53px] 2xl:p-[12px]"
               >
-                <span className="relative block size-full">
+                <span className="ch-hero__submit-icon relative block size-full">
                   <SendIcon />
                 </span>
               </button>
@@ -680,9 +680,9 @@ function HeroContent({
         {isHelpOpen ? <InstructionsCard onClose={onHelp} /> : null}
       </div>
       {error ? (
-        <div className="fixed left-1/2 top-1/2 z-50 flex w-[min(86vw,348px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#a90e25] bg-[#ffe4d7] px-8 py-[27.566px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)]">
-          <strong className="font-haim text-[40px] leading-none text-[#a90e25]">לא משהו...</strong>
-          <span className="text-[14px] leading-[1.2] text-[#2b2b2b] lg:text-[18px] 2xl:text-[20px]">{error}</span>
+        <div className="ch-hero__error fixed left-1/2 top-1/2 z-50 flex w-[min(86vw,348px)] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#a90e25] bg-[#ffe4d7] px-8 py-[27.566px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)]">
+          <strong className="ch-hero__error-title font-haim text-[40px] leading-none text-[#a90e25]">לא משהו...</strong>
+          <span className="ch-hero__error-message text-[14px] leading-[1.2] text-[#2b2b2b] lg:text-[18px] 2xl:text-[20px]">{error}</span>
         </div>
       ) : null}
     </section>
@@ -746,25 +746,25 @@ function SplashIntro({ header, onDone }: { header: ReactNode; onDone: () => void
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#fffaf0] transition-opacity duration-300 ${
+      className={`ch-splash pointer-events-none absolute inset-0 z-50 overflow-hidden bg-[#fffaf0] transition-opacity duration-300 ${
         exiting ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div className="absolute inset-x-0 bottom-0 top-0 lg:hidden">
+      <div className="ch-splash__collage-mobile absolute inset-x-0 top-0 h-[170dvh] lg:hidden">
         <SplashAnimatedCollage items={mobileCollage} />
       </div>
-      <div className="absolute inset-x-0 bottom-0 top-0 hidden lg:block">
+      <div className="ch-splash__collage-desktop absolute inset-x-0 top-0 hidden h-[170dvh] lg:block">
         <SplashAnimatedCollage items={desktopCollage} />
       </div>
-      <div className="splash-logo-sequence absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-        <div className="relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
-          <Image src={images.logo} alt="" fill priority sizes="(min-width: 1536px) 482px, (min-width: 1024px) 273px, 187px" />
+      <div className="ch-splash__logo splash-logo-sequence absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
+        <div className="ch-splash__logo-wrap relative aspect-482/196 w-[186.593px] lg:w-[273px] 2xl:w-[482px]">
+          <Image src={images.logo} alt="" fill priority sizes="(min-width: 1536px) 482px, (min-width: 1024px) 273px, 187px" className="ch-splash__logo-image" />
         </div>
-        <p className="font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
+        <p className="ch-splash__logo-text font-ploni-yad mt-[-0.12em] text-center text-[50px] leading-none text-[#2b2b2b] lg:text-[72.668px] 2xl:text-[128.309px]">
           איי.אל
         </p>
       </div>
-      <div className="splash-menu-sequence absolute inset-x-0 top-0 z-30">{header}</div>
+      <div className="ch-splash__header splash-menu-sequence absolute inset-x-0 top-0 z-30">{header}</div>
     </div>
   );
 }
@@ -832,11 +832,11 @@ function ExtraConfessionsGrid({
 
   return (
     <section
-      className="relative z-10 mx-auto mt-[min(34dvh,300px)] min-h-[720px] w-full pb-20"
+      className="ch-extra-grid relative z-10 mx-auto min-h-[720px] w-full pb-20"
       style={{ height: `${rows * 820}px` }}
     >
       {Array.from({ length: rows }, (_, row) => (
-        <div key={row} className="absolute inset-x-0 h-[820px]" style={{ top: `${row * 820}px` }}>
+        <div key={row} className="ch-extra-grid__row absolute inset-x-0 h-[820px]" style={{ top: `${row * 820}px` }}>
           {confessions.slice(row * extraCollagePositions.length, (row + 1) * extraCollagePositions.length).map((confession, index) => {
             const position = extraCollagePositions[index % extraCollagePositions.length];
             const absoluteIndex = row * extraCollagePositions.length + index;
@@ -862,9 +862,9 @@ function ExtraConfessionsGrid({
 
 function NewConfessionIllustration({ confession }: { confession: Confession }) {
   return (
-    <div className="absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_800ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
-      <div className="relative aspect-square w-[81%] rotate-[-15.76deg] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)]">
-        <Image src={confession.image} alt={confession.title} fill className="object-cover" sizes="(min-width: 1024px) 25vw, 64vw" />
+    <div className="ch-new-confession absolute left-[5%] top-[42%] z-10 flex aspect-square w-[64vw] animate-[passportIn_800ms_ease-out] items-center justify-center lg:left-[18%] lg:top-[58%] lg:w-[24.5vw]">
+      <div className="ch-new-confession__frame relative aspect-square w-[81%] rotate-[-15.76deg] overflow-hidden shadow-[0.9vw_1vw_0.7vw_-0.3vw_rgba(0,0,0,0.25)]">
+        <Image src={confession.image} alt={confession.title} fill className="ch-new-confession__image object-cover" sizes="(min-width: 1024px) 25vw, 64vw" />
       </div>
     </div>
   );
@@ -877,10 +877,10 @@ function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
     <button
       type="button"
       onClick={onDismiss}
-      className="absolute left-1/2 top-[129px] z-40 flex -translate-x-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#8cc63f] bg-[#f7ffec] p-[30px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)] lg:top-[136px] lg:w-[420px] 2xl:top-[160px] 2xl:w-[540px]"
+      className="ch-success-toast absolute left-1/2 top-[129px] z-40 flex -translate-x-1/2 flex-col items-center justify-center gap-[10px] rounded-[13.127px] border-2 border-[#8cc63f] bg-[#f7ffec] p-[30px] text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)] lg:top-[136px] lg:w-[420px] 2xl:top-[160px] 2xl:w-[540px]"
     >
-      <span className="font-haim w-[106px] text-[26px] text-[#61a605] lg:w-auto lg:text-[34px] 2xl:text-[46px]">היידה!</span>
-      <span className="w-[182px] text-[14px] text-[#2b2b2b] lg:w-auto lg:text-[18px] 2xl:text-[24px]">הוידוי שלך נוסף למאגר בהצלחה</span>
+      <span className="ch-success-toast__title font-haim w-[106px] text-[26px] text-[#61a605] lg:w-auto lg:text-[34px] 2xl:text-[46px]">היידה!</span>
+      <span className="ch-success-toast__message w-[182px] text-[14px] text-[#2b2b2b] lg:w-auto lg:text-[18px] 2xl:text-[24px]">הוידוי שלך נוסף למאגר בהצלחה</span>
     </button>
   );
 }
@@ -888,21 +888,23 @@ function SuccessToast({ onDismiss }: { onDismiss: () => void }) {
 function Backdrop({ onClick }: { onClick?: () => void }) {
   return (
     <>
-      <div className="absolute inset-0 lg:hidden">
-        <Collage items={mobileCollage} faded />
-      </div>
-      <div className="absolute inset-0 hidden lg:block">
-        <Collage items={desktopCollage} faded />
+      <div className="ch-backdrop absolute inset-0 overflow-hidden">
+        <div className="ch-backdrop__collage-mobile absolute inset-x-0 top-0 h-[170dvh] lg:hidden">
+          <Collage items={mobileCollage} faded />
+        </div>
+        <div className="ch-backdrop__collage-desktop absolute inset-x-0 top-0 hidden h-[170dvh] lg:block">
+          <Collage items={desktopCollage} faded />
+        </div>
       </div>
       {onClick ? (
         <button
           type="button"
           onClick={onClick}
-          className="absolute inset-0 z-10 bg-[rgba(255,250,240,0.8)] backdrop-blur-[3.15px]"
+          className="ch-backdrop__overlay-btn absolute inset-0 z-10 bg-[rgba(255,250,240,0.8)] backdrop-blur-[3.15px]"
           aria-label="Close confession"
         />
       ) : (
-        <div className="absolute inset-0 z-10 bg-[rgba(255,250,240,0.8)] backdrop-blur-[3.15px]" />
+        <div className="ch-backdrop__overlay absolute inset-0 z-10 bg-[rgba(255,250,240,0.8)] backdrop-blur-[3.15px]" />
       )}
     </>
   );
@@ -910,7 +912,7 @@ function Backdrop({ onClick }: { onClick?: () => void }) {
 
 function ScreenCanvas({ children }: { children: ReactNode }) {
   return (
-    <div className="smooth-scroll relative min-h-dvh w-full flex-1 overflow-y-auto overflow-x-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
+    <div className="ch-screen-canvas smooth-scroll relative h-dvh min-h-dvh w-full overflow-y-auto overflow-x-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]" dir="rtl">
       {children}
     </div>
   );
@@ -918,7 +920,7 @@ function ScreenCanvas({ children }: { children: ReactNode }) {
 
 function TagPill({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-[#998e8a] px-2 py-0.5 text-right font-sans text-[14px] text-[#745447] lg:text-[18px] 2xl:text-[24px]" dir="rtl">
+    <span className="ch-tag-pill rounded-full border border-[#998e8a] px-2 py-0.5 text-right font-sans text-[14px] text-[#745447] lg:text-[18px] 2xl:text-[24px]" dir="rtl">
       {children}
     </span>
   );
@@ -939,27 +941,27 @@ function ChutzpahMeter({
   const showValue = hovering || dragging;
 
   return (
-    <div className="flex w-[296px] flex-col items-end justify-center gap-2 lg:w-auto lg:flex-row-reverse lg:items-end lg:gap-[22.336px]">
-      <p className="w-full shrink-0 text-right text-[14px] font-bold lg:w-auto lg:whitespace-nowrap lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]">
-        <span className="lg:hidden">דרגי בחוצפמטר</span>
-        <span className="hidden lg:inline">דרג.י בחוצפמטר:</span>
+    <div className="ch-meter flex w-[296px] flex-col items-end justify-center gap-2 lg:w-auto lg:flex-row lg:items-end lg:gap-[22.336px]" dir="ltr">
+      <p className="ch-meter__label order-1 w-full shrink-0 text-right text-[14px] font-bold lg:order-2 lg:w-auto lg:whitespace-nowrap lg:pb-[2px] lg:text-[20px] 2xl:text-[26px]" dir="rtl">
+        <span className="ch-meter__label-mobile lg:hidden">דרגי בחוצפמטר</span>
+        <span className="ch-meter__label-desktop hidden lg:inline">דרג.י בחוצפמטר:</span>
       </p>
       <div
         dir="ltr"
-        className="chutzpah-meter relative h-[52px] w-full max-w-[470px] lg:h-[63px] 2xl:h-[68px] 2xl:max-w-[640px]"
+        className="ch-meter__track chutzpah-meter order-2 relative h-[52px] w-full max-w-[470px] lg:order-1 lg:h-[63px] 2xl:h-[68px] 2xl:max-w-[640px]"
         onPointerEnter={() => setHovering(true)}
         onPointerLeave={() => setHovering(false)}
       >
         {showValue ? (
           <span
-            className="absolute top-[-8px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
+            className="ch-meter__value-tooltip absolute top-[-8px] z-10 h-[27px] min-w-[48px] -translate-x-1/2 rounded-[5px] bg-white px-2 text-center text-[14px] leading-[27px] text-[#2b2b2b] shadow-[1px_1px_4px_rgba(0,0,0,0.25)] lg:text-[18px] 2xl:h-[34px] 2xl:min-w-[62px] 2xl:text-[22px] 2xl:leading-[34px]"
             style={{ left: `calc(${value}% + (0.5 - ${value / 100}) * var(--thumb-size))` }}
           >
             {value}%
           </span>
         ) : null}
-        <div className="absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] lg:top-[39px] 2xl:top-[40px] 2xl:h-[27px]">
-          <div className="h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
+        <div className="ch-meter__bar absolute left-0 top-[31px] h-[20px] w-full overflow-hidden rounded-[20px] border border-[blue] bg-[#fffcf8] lg:top-[39px] 2xl:top-[40px] 2xl:h-[27px]">
+          <div className="ch-meter__fill h-full rounded-[20px] bg-[#d1e2ff]" style={{ width: `${value}%` }} />
         </div>
         <input
           type="range"
@@ -974,7 +976,7 @@ function ChutzpahMeter({
             onRatingCommit?.(Number(event.currentTarget.value));
           }}
           onChange={(event) => onRatingChange?.(Number(event.target.value))}
-          className="chutzpah-range absolute left-0 top-[26px] w-full lg:top-[34px] 2xl:top-[35px]"
+          className="ch-meter__input chutzpah-range absolute left-0 top-[26px] w-full lg:top-[34px] 2xl:top-[35px]"
           style={{ height: "var(--thumb-size)" }}
           aria-label="Chutzpah meter"
         />
@@ -1019,30 +1021,30 @@ function ConfessionCard({
     <div
       className={
         isPreview
-          ? "relative z-20 mx-auto mt-[80px] flex w-[342px] flex-col items-center gap-[22px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
-          : "relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-[260px] lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
+          ? "ch-confession-card ch-confession-card--preview relative z-20 mx-auto mt-[80px] flex w-[342px] flex-col items-center gap-[22px] pb-10 lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
+          : "ch-confession-card ch-confession-card--detail relative z-20 mx-auto mt-[55px] flex w-[342px] flex-col items-center gap-[16px] pb-[260px] lg:absolute lg:left-1/2 lg:top-1/2 lg:mt-0 lg:w-[min(86vw,1013px)] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:pb-0 2xl:w-[1390px]"
       }
     >
       <article
-        className="flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:h-[620px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:h-[850px]"
+        className="ch-confession-card__article flex w-full flex-col items-center bg-[#fffcf8] pb-5 text-right drop-shadow-[4px_4px_3.3px_rgba(0,0,0,0.25)] lg:h-[620px] lg:flex-row lg:items-stretch lg:justify-center lg:pb-0 2xl:h-[850px]"
         dir="ltr"
       >
         <div
-          className={`relative aspect-square w-full overflow-hidden lg:h-full lg:aspect-square lg:w-auto lg:shrink-0 ${
+          className={`ch-confession-card__image-wrap relative aspect-square w-full overflow-hidden lg:h-full lg:aspect-square lg:w-auto lg:shrink-0 ${
             isPreview && selectedPreviewImageIndex === previewImageIndex ? "ring-4 ring-[blue]" : ""
           }`}
         >
-          <Image src={image} alt={confession.title} fill priority className="object-cover" sizes="342px" />
+          <Image src={image} alt={confession.title} fill priority className="ch-confession-card__image object-cover" sizes="342px" />
           {isPreview ? (
             <button
               type="button"
               onClick={() => setSelectedPreviewImageIndex(previewImageIndex)}
-              className="absolute inset-0 z-10 cursor-pointer"
+              className="ch-confession-card__image-select-btn absolute inset-0 z-10 cursor-pointer"
               aria-label="Select this preview image"
             />
           ) : null}
           {flashRating !== undefined ? (
-            <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-[6.837px] bg-[#fffcf8] px-[30px] py-[13px] text-[27px] font-bold text-[#2b2b2b] shadow-[3px_3px_18px_rgba(0,0,0,0.18)]">
+            <div className="ch-confession-card__flash-rating absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-[6.837px] bg-[#fffcf8] px-[30px] py-[13px] text-[27px] font-bold text-[#2b2b2b] shadow-[3px_3px_18px_rgba(0,0,0,0.18)]">
               {flashRating}%
             </div>
           ) : null}
@@ -1050,7 +1052,7 @@ function ConfessionCard({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-[25px] top-[10px] z-20 flex size-[60px] items-center justify-center text-[46px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
+              className="ch-confession-card__close-btn ch-confession-card__close-btn--mobile absolute right-[25px] top-[10px] z-20 flex size-[60px] items-center justify-center text-[46px] leading-none text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.55)] lg:hidden"
               aria-label="Close"
             >
               ×
@@ -1058,21 +1060,21 @@ function ConfessionCard({
           ) : null}
           {isPreview ? (
             <>
-              <div className="absolute inset-x-0 bottom-0 h-[76px] bg-linear-to-b from-transparent to-[rgba(0,0,0,0.7)]" />
-              <div className="absolute bottom-[17px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-[108px] text-[34px] leading-none text-white lg:gap-[218.63px]">
+              <div className="ch-confession-card__preview-gradient absolute inset-x-0 bottom-0 h-[76px] bg-linear-to-b from-transparent to-[rgba(0,0,0,0.7)]" />
+              <div className="ch-confession-card__preview-nav absolute bottom-[17px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-[108px] text-[34px] leading-none text-white lg:gap-[218.63px]">
                 <button
                   type="button"
                   onClick={() => setPreviewImageIndex((value) => (value + previewImages.length - 1) % previewImages.length)}
                   aria-label="Previous preview image"
-                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                  className="ch-confession-card__preview-prev drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
                 >
                   ←
                 </button>
-                <span className="flex items-center gap-1">
+                <span className="ch-confession-card__preview-dots flex items-center gap-1">
                   {previewImages.map((option, index) => (
                     <span
                       key={`${option}-${index}`}
-                      className={`block rounded-full ${index === previewImageIndex ? "size-[14px] bg-white" : "size-[9px] bg-white/55"}`}
+                      className={`ch-confession-card__preview-dot block rounded-full ${index === previewImageIndex ? "size-[14px] bg-white" : "size-[9px] bg-white/55"}`}
                     />
                   ))}
                 </span>
@@ -1080,7 +1082,7 @@ function ConfessionCard({
                   type="button"
                   onClick={() => setPreviewImageIndex((value) => (value + 1) % previewImages.length)}
                   aria-label="Next preview image"
-                  className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
+                  className="ch-confession-card__preview-next drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]"
                 >
                   →
                 </button>
@@ -1089,36 +1091,41 @@ function ConfessionCard({
           ) : null}
         </div>
 
-        <div className="mt-5 flex w-[292px] flex-col items-end gap-4 text-right lg:m-0 lg:h-full lg:flex-1 lg:justify-start lg:px-[70px] lg:py-[20px] 2xl:px-[86px] 2xl:py-[40px]" dir="rtl">
+        <div
+          className={`ch-confession-card__content relative mt-5 flex w-[292px] flex-col items-end gap-4 text-right lg:m-0 lg:h-full lg:flex-1 lg:justify-start lg:px-[70px] 2xl:px-[86px] ${
+            isPreview ? "lg:py-[20px] 2xl:py-[40px]" : "lg:pb-[69px] lg:pt-[68px] 2xl:pb-[92px] 2xl:pt-[92px]"
+          }`}
+          dir="rtl"
+        >
           {!isPreview ? (
             <button
               type="button"
               onClick={onClose}
-              className="mb-1 hidden size-[63px] items-center justify-center self-end text-[60px] leading-none text-[#2b2b2b] lg:flex"
+              className="ch-confession-card__close-btn ch-confession-card__close-btn--desktop hidden items-center justify-center text-[46px] leading-none text-[#2b2b2b] lg:absolute lg:right-[22px] lg:top-[20px] lg:flex lg:h-[21px] lg:w-[31.5px] 2xl:right-[30px] 2xl:top-[28px] 2xl:h-[28px] 2xl:w-[42px] 2xl:text-[60px]"
               aria-label="Close"
             >
               ×
             </button>
           ) : null}
-          <div className="flex w-full flex-col items-end gap-[13px]">
-            <div className="flex w-full flex-col items-end gap-1.5">
-              {isPreview ? <p className="w-full text-right text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
-              <div className="flex w-full flex-col items-end gap-0.5">
-                <h1 className="w-full text-right font-haim text-[26px] leading-none text-[blue] lg:text-[36px] 2xl:text-[52px]">{confession.title}</h1>
-                <p className="w-full text-right text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
+          <div className="ch-confession-card__header flex w-full flex-col items-end gap-[13px]">
+            <div className="ch-confession-card__title-group flex w-full flex-col items-end gap-1.5">
+              {isPreview ? <p className="ch-confession-card__preview-label w-full text-right text-[14px] text-[blue] lg:text-[20px] 2xl:text-[24px]">תצוגה לפני פרסום</p> : null}
+              <div className="ch-confession-card__title-row flex w-full flex-col items-end gap-0.5">
+                <h1 className="ch-confession-card__title w-full text-right font-haim text-[26px] leading-none text-[blue] lg:text-[36px] 2xl:text-[52px]">{confession.title}</h1>
+                <p className="ch-confession-card__date w-full text-right text-[14px] text-[#868686] lg:text-[18px] 2xl:text-[24px]">{confession.date}</p>
               </div>
             </div>
-            <p className="w-full text-right text-[14px] leading-[1.296] text-[#2b2b2b] lg:text-[18px] 2xl:text-[24px]">{confession.content}</p>
+            <p className="ch-confession-card__body w-full text-right text-[14px] leading-[1.296] text-[#2b2b2b] lg:max-w-[214px] lg:text-[18px] 2xl:max-w-[286px] 2xl:text-[24px]">{confession.content}</p>
             {!isPreview ? (
-              <p className="w-full text-right text-[14px] lg:text-[18px] 2xl:text-[24px]">
-                <span className="text-[#998e8a]">דירוג חוצפמטר ממוצע:</span>{" "}
-                <span className="text-[#2b2b2b]">{confession.averageScore}%</span>
+              <p className="ch-confession-card__average-score w-full text-right text-[14px] lg:text-[18px] 2xl:text-[24px]">
+                <span className="ch-confession-card__average-score-label text-[#998e8a]">דירוג חוצפמטר ממוצע:</span>{" "}
+                <span className="ch-confession-card__average-score-value text-[#2b2b2b]">{confession.averageScore}%</span>
               </p>
             ) : null}
           </div>
-          <div className="mt-auto flex w-full flex-col items-end gap-2">
-            <span className="hidden w-full text-right font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
-            <div className="flex w-full flex-wrap items-center justify-end gap-2" dir="rtl">
+          <div className="ch-confession-card__tags-section mt-auto flex w-full flex-col items-end gap-2">
+            <span className="ch-confession-card__tags-label hidden w-full text-right font-bold text-[#2b2b2b] lg:block lg:text-[18px] 2xl:text-[24px]">תגים:</span>
+            <div className="ch-confession-card__tags flex w-full flex-wrap items-center justify-end gap-2" dir="rtl">
               {confession.tags.map((tag) => (
                 <TagPill key={tag}>{tag}</TagPill>
               ))}
@@ -1128,24 +1135,24 @@ function ConfessionCard({
       </article>
 
       {isPreview ? (
-        <div className="flex items-center gap-[10px] lg:mt-1" dir="rtl">
+        <div className="ch-confession-card__actions flex items-center gap-[10px] lg:mt-1" dir="rtl">
           <button
             type="button"
             onClick={() => onPublish?.(selectedImage)}
-            className="flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8] 2xl:w-[134px] 2xl:text-[24px]"
+            className="ch-confession-card__publish-btn flex w-[101px] items-center justify-center gap-[6px] rounded-[50.116px] bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8] 2xl:w-[134px] 2xl:text-[24px]"
             dir="rtl"
           >
-            <span className="leading-none">↑</span>
-            <span>פרסום</span>
+            <span className="ch-confession-card__publish-icon leading-none">↑</span>
+            <span className="ch-confession-card__publish-label">פרסום</span>
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3] 2xl:text-[24px]"
+            className="ch-confession-card__cancel-btn rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3] 2xl:text-[24px]"
           >
             ביטול
           </button>
-          {actionError ? <p className="max-w-[300px] text-right text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">{actionError}</p> : null}
+          {actionError ? <p className="ch-confession-card__action-error max-w-[300px] text-right text-[14px] text-[blue] lg:text-[18px] 2xl:text-[24px]">{actionError}</p> : null}
         </div>
       ) : (
         <ChutzpahMeter rating={rating} onRatingChange={onRatingChange} onRatingCommit={onRatingCommit} />
@@ -1173,16 +1180,16 @@ function LoadingImageScreen({ src }: { src: string }) {
   }, [isSuitcase]);
 
   const frameClassName =
-    "absolute left-1/2 top-1/2 z-20 flex h-[min(67dvh,430px)] w-[342px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center bg-[#fefdf8] px-0 py-[35px] text-center drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)] lg:h-[620px] lg:w-[1013px] lg:px-[210px] lg:pb-[42px] lg:pl-[210px] lg:pr-[211px] lg:pt-[35px]";
-  const textClassName = "shrink-0 text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]";
+    "ch-loading-screen__frame absolute left-1/2 top-1/2 z-20 flex h-[min(67dvh,430px)] w-[342px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center bg-[#fefdf8] px-0 py-[35px] text-center drop-shadow-[204px_141px_34.5px_rgba(0,0,0,0),130px_90px_32px_rgba(0,0,0,0.01),73px_51px_27px_rgba(0,0,0,0.05),33px_23px_20px_rgba(0,0,0,0.09),8px_6px_11px_rgba(0,0,0,0.1)] lg:h-[620px] lg:w-[1013px] lg:px-[210px] lg:pb-[42px] lg:pl-[210px] lg:pr-[211px] lg:pt-[35px]";
+  const textClassName = "ch-loading-screen__text shrink-0 text-center text-[20px] text-[#2b2b2b] lg:text-[24px] 2xl:text-[30px]";
 
   if (isCroissants) {
     return (
       <ScreenCanvas>
         <Backdrop />
-        <div className={`${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ העמסת מזון" data-figma-node-id="1115:31631">
+        <div className={`ch-loading-screen ch-loading-screen--croissants ${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ העמסת מזון" data-figma-node-id="1115:31631">
           <video
-            className="h-[263px] w-[341px] shrink-0 object-contain lg:h-[705px] lg:w-[913px]"
+            className="ch-loading-screen__video h-[263px] w-[341px] shrink-0 object-contain lg:h-[705px] lg:w-[913px]"
             autoPlay
             loop
             muted
@@ -1194,7 +1201,7 @@ function LoadingImageScreen({ src }: { src: string }) {
           </video>
           <p className={textClassName}>
             {loadingText}
-            <span className="loading-dots" aria-hidden="true" />
+            <span className="ch-loading-screen__dots loading-dots" aria-hidden="true" />
           </p>
         </div>
       </ScreenCanvas>
@@ -1204,9 +1211,9 @@ function LoadingImageScreen({ src }: { src: string }) {
   return (
     <ScreenCanvas>
       <Backdrop />
-      <div className={`${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ מזוודה" data-figma-node-id="1179:12877">
+      <div className={`ch-loading-screen ch-loading-screen--suitcase ${frameClassName} gap-[20px] lg:gap-[14px]`} data-figma-name="לופ מזוודה" data-figma-node-id="1179:12877">
         <video
-          className="h-[296px] w-[312px] shrink-0 object-contain lg:h-[704px] lg:w-[741px]"
+          className="ch-loading-screen__video h-[296px] w-[312px] shrink-0 object-contain lg:h-[704px] lg:w-[741px]"
           autoPlay
           loop
           muted
@@ -1236,17 +1243,17 @@ function Modal({
   onCancel: () => void;
 }) {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/25 px-6">
-      <div className="flex w-[330px] flex-col items-center gap-[10px] rounded-[13.127px] border-2 border-[#fbb03b] bg-[#fff9de] px-8 py-7 text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)] lg:w-[466px] lg:px-[78px] 2xl:w-[560px]">
-        <h2 className="font-haim text-[40px] leading-none text-[#fbb03b]">{title}</h2>
-        <div className="text-[20px] leading-[0.98] text-[#2b2b2b]">{children}</div>
-        <div className="flex gap-3">
+    <div className="ch-modal absolute inset-0 z-50 flex items-center justify-center bg-black/25 px-6">
+      <div className="ch-modal__dialog flex w-[330px] flex-col items-center gap-[10px] rounded-[13.127px] border-2 border-[#fbb03b] bg-[#fff9de] px-8 py-7 text-center drop-shadow-[128px_74px_20.5px_rgba(0,0,0,0),82px_47px_19px_rgba(0,0,0,0.01),46px_27px_16px_rgba(0,0,0,0.05),21px_12px_12px_rgba(0,0,0,0.09),5px_3px_6.5px_rgba(0,0,0,0.1)] lg:w-[466px] lg:px-[78px] 2xl:w-[560px]">
+        <h2 className="ch-modal__title font-haim text-[40px] leading-none text-[#fbb03b]">{title}</h2>
+        <div className="ch-modal__content text-[20px] leading-[0.98] text-[#2b2b2b]">{children}</div>
+        <div className="ch-modal__actions flex gap-3">
           {onConfirm ? (
-            <button type="button" onClick={onConfirm} className="rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3]">
+            <button type="button" onClick={onConfirm} className="ch-modal__confirm-btn rounded-full border border-[#998e8a] px-[18px] py-[5px] text-[20px] text-[#2b2b2b] transition-colors hover:bg-[#eae5e3]">
               למחוק
             </button>
           ) : null}
-          <button type="button" onClick={onCancel} className="rounded-full bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8]">
+          <button type="button" onClick={onCancel} className="ch-modal__cancel-btn rounded-full bg-[blue] px-5 py-[5px] text-[20px] font-semibold text-[#fffcf8] transition-colors hover:bg-[#0010a8]">
             להישאר
           </button>
         </div>
@@ -1257,9 +1264,9 @@ function Modal({
 
 function EmptyState({ onReset }: { onReset: () => void }) {
   return (
-    <div className="absolute left-1/2 top-[65%] z-30 flex -translate-x-1/2 flex-col items-center gap-3 rounded-[18px] border border-[#998e8a] bg-[#fffcf8]/95 px-6 py-5 text-center shadow-[6px_6px_18px_rgba(0,0,0,0.15)]">
-      <p className="text-[16px] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]">לא נמצאו וידויים מתאימים</p>
-      <button type="button" onClick={onReset} className="rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8] lg:text-[18px] 2xl:text-[24px]">
+    <div className="ch-empty-state absolute left-1/2 top-[65%] z-30 flex -translate-x-1/2 flex-col items-center gap-3 rounded-[18px] border border-[#998e8a] bg-[#fffcf8]/95 px-6 py-5 text-center shadow-[6px_6px_18px_rgba(0,0,0,0.15)]">
+      <p className="ch-empty-state__message text-[16px] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]">לא נמצאו וידויים מתאימים</p>
+      <button type="button" onClick={onReset} className="ch-empty-state__reset-btn rounded-full bg-[blue] px-5 py-1.5 text-[14px] text-[#fffcf8] lg:text-[18px] 2xl:text-[24px]">
         איפוס סינון
       </button>
     </div>
@@ -1268,7 +1275,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
 
 function CheckInstructionIcon() {
   return (
-    <svg viewBox="0 0 18 18" aria-hidden="true" className="size-[18px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 18 18" aria-hidden="true" className="ch-instruction-icon ch-instruction-icon--check size-[18px]" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 9.25L7.35 12.6L14 5.9" stroke="#61A605" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -1276,7 +1283,7 @@ function CheckInstructionIcon() {
 
 function XInstructionIcon() {
   return (
-    <svg viewBox="0 0 19 12.667" aria-hidden="true" className="h-[12.667px] w-[19px]" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 19 12.667" aria-hidden="true" className="ch-instruction-icon ch-instruction-icon--x h-[12.667px] w-[19px]" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M5.2 2.55L13.8 11.15M13.8 2.55L5.2 11.15" stroke="#C4142F" strokeWidth="2.6" strokeLinecap="round" />
     </svg>
   );
@@ -1284,7 +1291,7 @@ function XInstructionIcon() {
 
 function ExclamationInstructionIcon() {
   return (
-    <span aria-hidden="true" className="flex h-[23.294px] w-[18px] items-center justify-center text-center text-[23.294px] font-bold leading-none text-[#fbb03b]">
+    <span aria-hidden="true" className="ch-instruction-icon ch-instruction-icon--exclamation flex h-[23.294px] w-[18px] items-center justify-center text-center text-[23.294px] font-bold leading-none text-[#fbb03b]">
       !
     </span>
   );
@@ -1300,16 +1307,16 @@ function InstructionsContent() {
 
   return (
     <>
-      <h2 className="w-full text-right font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
-      <div className="flex w-full flex-col gap-[10px] lg:gap-[14px]">
+      <h2 className="ch-instructions__title w-full text-right font-haim text-[20px] text-[#020202] lg:text-[24px] 2xl:text-[30px]">איך לכתוב וידוי טוב?</h2>
+      <div className="ch-instructions__list flex w-full flex-col gap-[10px] lg:gap-[14px]">
         {rows.map(({ icon, text }) => (
           <p
             key={text}
-            className="flex w-full items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]"
+            className="ch-instructions__row flex w-full items-center justify-end gap-[18px] text-right text-[14px] leading-[1.477] text-[#2b2b2b] lg:text-[20px] 2xl:text-[24px]"
             dir="ltr"
           >
-            <span dir="rtl">{text}</span>
-            <span className="flex w-[19px] shrink-0 items-center justify-center">{icon}</span>
+            <span className="ch-instructions__text" dir="rtl">{text}</span>
+            <span className="ch-instructions__icon flex w-[19px] shrink-0 items-center justify-center">{icon}</span>
           </p>
         ))}
       </div>
@@ -1320,13 +1327,13 @@ function InstructionsContent() {
 function InstructionsCard({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="absolute left-1/2 top-[calc(100%+10px)] z-50 flex w-full -translate-x-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:z-40 lg:px-[71px]"
+      className="ch-instructions absolute left-1/2 top-[calc(100%+10px)] z-50 flex w-full -translate-x-1/2 flex-col items-end gap-[9px] rounded-[28px] border-2 border-[#eae5e3] bg-[#fffcf8] px-5 py-5 text-right shadow-[4px_4px_12px_rgba(0,0,0,0.18)] lg:z-40 lg:px-[71px]"
       dir="rtl"
     >
       <button
         type="button"
         onClick={onClose}
-        className="absolute left-4 top-3 text-[24px] leading-none text-[#2b2b2b] lg:hidden"
+        className="ch-instructions__close-btn absolute left-4 top-3 text-[24px] leading-none text-[#2b2b2b] lg:hidden"
         aria-label="Close instructions"
       >
         ×
@@ -1448,17 +1455,19 @@ function HomeScreen({
 
   return (
     <div
-      className="relative flex h-dvh w-full flex-col overflow-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]"
+      className="ch-home relative flex h-dvh w-full flex-col overflow-hidden bg-[#fffaf0] font-sans text-[#2b2b2b]"
       dir="rtl"
     >
       {renderHeader()}
-      <main ref={mainRef} className="smooth-scroll relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
-        <div key={`m-${reflowKey}`} className="gallery-reflow absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 lg:hidden">
+      <main ref={mainRef} className="ch-home__main smooth-scroll relative min-h-0 w-full flex-1 overflow-y-auto overflow-x-hidden" aria-label="Homepage hero">
+        <div key={`m-${reflowKey}`} className="ch-home__collage-mobile gallery-reflow absolute inset-x-0 -top-[clamp(50px,6.5vw,83px)] z-0 h-[170dvh] lg:hidden">
           <Collage items={mobileItems} shrinkIndex={newConfession && newConfessionEntering ? 4 : undefined} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
         </div>
-        <div key={`d-${reflowKey}`} className="gallery-reflow absolute inset-x-0 bottom-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden lg:block">
+        <div key={`d-${reflowKey}`} className="ch-home__collage-desktop gallery-reflow absolute inset-x-0 -top-[clamp(50px,6.5vw,83px)] z-0 hidden h-[170dvh] lg:block">
           <Collage items={desktopItems} shrinkIndex={newConfession && newConfessionEntering ? 6 : undefined} scrollProgress={scrollProgress} onOpenDetail={onOpenDetail} />
         </div>
+        {/* Flow spacer so the collage canvas (taller than the viewport) is reachable by scrolling. */}
+        <div aria-hidden="true" className="ch-home__scroll-spacer h-[calc(170dvh-clamp(50px,6.5vw,83px))]" />
         {newConfession && newConfessionEntering ? <NewConfessionIllustration confession={newConfession} /> : null}
         <HeroContent
           prompt={prompt}
